@@ -1,0 +1,2381 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --navy: #16324F;
+  --teal: #0F9D8A;
+  --dark: #273746;
+  --bg: #F4F7FA;
+  --white: #FFFFFF;
+  --gray: #DCE6EE;
+
+  --low: #2673C9;
+  --resolved: #16803C;
+  --medium: #F2A900;
+  --critical: #B42318;
+
+  font-family: "Outfit", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--dark);
+  font-family: inherit;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* =====================================================
+   APP
+   ===================================================== */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+}
+
+.sidebar {
+  width: 270px;
+  background: var(--navy);
+  color: white;
+  position: fixed;
+  inset: 0 auto 0 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  z-index: 20;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 10px 25px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-brand strong {
+  display: block;
+  font-size: 20px;
+}
+
+.sidebar-brand span {
+  display: block;
+  font-size: 11px;
+  opacity: .65;
+}
+
+.brand-mark {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: var(--teal);
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 800;
+  font-size: 32px;
+}
+
+.brand-mark.small {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  font-size: 23px;
+}
+
+.sidebar nav {
+  padding-top: 20px;
+  display: grid;
+  gap: 5px;
+}
+
+.nav-item {
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,.08);
+  color: white;
+}
+
+.nav-item.active {
+  background: var(--teal);
+  color: white;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  font-size: 10px;
+  opacity: .5;
+  padding: 10px;
+}
+
+.main-area {
+  margin-left: 270px;
+  width: calc(100% - 270px);
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 84px;
+  background: white;
+  border-bottom: 1px solid var(--gray);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 34px;
+}
+
+.topbar strong {
+  display: block;
+  margin-top: 2px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user span {
+  display: block;
+  font-size: 11px;
+  color: #81909d;
+  margin-top: 2px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--navy);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.content {
+  padding: 34px;
+}
+
+.page-section {
+  max-width: 1500px;
+  margin: auto;
+}
+
+.page-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  color: var(--teal);
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+h1 {
+  margin: 5px 0 7px;
+  font-size: 32px;
+  letter-spacing: -.8px;
+}
+
+.page-description {
+  color: #71808f;
+  margin: 0;
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   BOTONES
+   ===================================================== */
+
+.primary-button {
+  border: 0;
+  border-radius: 12px;
+  background: var(--teal);
+  color: white;
+  padding: 13px 18px;
+  font-weight: 800;
+  transition: .2s ease;
+}
+
+.primary-button:hover {
+  filter: brightness(.94);
+  transform: translateY(-1px);
+}
+
+.link-button {
+  border: 0;
+  background: none;
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.date-button,
+.small-filter {
+  border: 1px solid var(--gray);
+  background: white;
+  color: var(--dark);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   DASHBOARD
+   ===================================================== */
+
+.inspecta-dashboard {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+.dashboard-kicker {
+  color: var(--teal);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.dashboard-header h1 {
+  font-size: 30px;
+  margin: 5px 0;
+  letter-spacing: -.8px;
+}
+
+.dashboard-header p {
+  margin: 0;
+  color: #81909d;
+  font-size: 13px;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+
+/* =====================================================
+   METRICAS
+   ===================================================== */
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.metric-card {
+  min-height: 155px;
+  border-radius: 20px;
+  padding: 19px;
+  background: white;
+  border: 1px solid rgba(220, 230, 238, .9);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  right: -50px;
+  bottom: -65px;
+  border-radius: 50%;
+  background: rgba(15, 157, 138, .06);
+}
+
+.metric-card.blue::after {
+  background: rgba(38, 115, 201, .07);
+}
+
+.metric-card.orange::after {
+  background: rgba(242, 169, 0, .09);
+}
+
+.metric-card.purple::after {
+  background: rgba(22, 50, 79, .07);
+}
+
+.metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+
+.metric-top > span {
+  font-size: 9px;
+  color: #9aa6b0;
+}
+
+.metric-icon {
+  width: 37px;
+  height: 37px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: #e6f6f3;
+  color: var(--teal);
+  font-size: 18px;
+}
+
+.metric-card.blue .metric-icon {
+  background: #eaf2fb;
+  color: var(--low);
+}
+
+.metric-card.orange .metric-icon {
+  background: #fff4d6;
+  color: var(--medium);
+}
+
+.metric-card.purple .metric-icon {
+  background: #edf1f5;
+  color: var(--navy);
+}
+
+.metric-title {
+  display: block;
+  font-size: 11px;
+  color: #71808f;
+  margin-bottom: 2px;
+}
+
+.metric-value {
+  display: block;
+  color: var(--dark);
+  font-size: 27px;
+  line-height: 1.2;
+}
+
+.metric-card small {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 7px;
+  font-size: 10px;
+}
+
+.trend-positive {
+  color: var(--resolved);
+}
+
+.trend-negative {
+  color: var(--critical);
+}
+
+
+/* =====================================================
+   TARJETAS PRINCIPALES
+   ===================================================== */
+
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.dashboard-card {
+  width: 100%;
+  background: rgba(255,255,255,.95);
+  border: 1px solid rgba(220,230,238,.9);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(22,50,79,.025);
+
+  /*
+    Importante:
+    dejamos que la tarjeta crezca según su contenido.
+  */
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.card-header {
+  min-height: 70px;
+  padding: 19px 21px 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-label {
+  display: block;
+  color: var(--teal);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+}
+
+.card-header h2 {
+  color: var(--dark);
+  font-size: 15px;
+  margin: 0;
+}
+
+.card-header-icon {
+  color: var(--teal);
+  font-size: 20px;
+}
+
+
+/* =====================================================
+   CUMPLIMIENTO
+   ===================================================== */
+
+.compliance-content {
+  padding: 3px 21px 20px;
+  display: grid;
+  grid-template-columns: 135px minmax(0, 1fr);
+  align-items: center;
+}
+
+.compliance-number {
+  display: flex;
+  flex-direction: column;
+}
+
+.compliance-number strong {
+  font-size: 38px;
+  color: var(--dark);
+  letter-spacing: -1px;
+}
+
+.compliance-number span {
+  color: var(--resolved);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.compliance-number small {
+  color: #9aa6b0;
+  font-size: 9px;
+  margin-top: 5px;
+}
+
+.chart-container,
+.incident-chart {
+  min-width: 0;
+  width: 100%;
+}
+
+
+/* =====================================================
+   SEVERIDAD
+   ===================================================== */
+
+.severity-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #edf1f4;
+  padding: 13px 20px;
+}
+
+.severity-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: #71808f;
+}
+
+.severity-item strong {
+  color: var(--dark);
+  margin-left: auto;
+}
+
+.severity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.severity-dot.low {
+  background: var(--low);
+}
+
+.severity-dot.medium {
+  background: var(--medium);
+}
+
+.severity-dot.critical {
+  background: var(--critical);
+}
+
+
+/* =====================================================
+   INSPECCIONES + ACCIONES
+   ===================================================== */
+
+.dashboard-lower-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+
+  /*
+    Evita que ambas columnas intenten
+    forzar una altura incorrecta.
+  */
+  align-items: start;
+}
+
+.dashboard-lower-grid .dashboard-card {
+  min-height: 330px;
+  height: auto;
+  overflow: hidden;
+}
+
+
+/* =====================================================
+   INSPECCIONES
+   ===================================================== */
+
+.inspection-list {
+  width: 100%;
+  padding: 0 20px 15px;
+}
+
+.inspection-row {
+  min-height: 82px;
+  width: 100%;
+
+  display: grid;
+  grid-template-columns:
+    38px
+    minmax(130px, 1fr)
+    65px
+    90px
+    90px
+    16px;
+
+  align-items: center;
+  gap: 10px;
+
+  border-top: 1px solid #edf1f4;
+}
+
+.inspection-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #e6f6f3;
+  color: var(--teal);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+}
+
+.inspection-info {
+  min-width: 0;
+}
+
+.inspection-info strong {
+  display: block;
+  font-size: 11px;
+  color: var(--dark);
+
+  /*
+    Si el nombre es largo no rompe
+    el layout.
+  */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inspection-info span {
+  display: block;
+  font-size: 9px;
+  color: #8a98a3;
+  margin-top: 3px;
+}
+
+.inspection-date {
+  color: #81909d;
+  font-size: 9px;
+}
+
+.status-pill,
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 8px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-pill.success {
+  color: var(--resolved);
+  background: #e8f6ed;
+}
+
+.status-pill.medium {
+  color: #936c00;
+  background: #fff4d6;
+}
+
+.status-pill.low {
+  color: var(--low);
+  background: #eaf2fb;
+}
+
+.inspection-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inspection-progress strong {
+  font-size: 9px;
+  color: var(--dark);
+}
+
+.mini-progress {
+  width: 70px;
+  height: 5px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: #e8eef2;
+}
+
+.mini-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--teal);
+}
+
+.row-arrow {
+  color: #a6b0b8;
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   ACCIONES CORRECTIVAS
+   ===================================================== */
+
+.action-list {
+  width: 100%;
+  padding: 0 20px 15px;
+}
+
+.action-row {
+  min-height: 82px;
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+
+  gap: 11px;
+  align-items: center;
+
+  border-top: 1px solid #edf1f4;
+}
+
+.action-status {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--medium);
+}
+
+.action-row:first-child .action-status {
+  background: var(--critical);
+}
+
+.action-row:last-child .action-status {
+  background: var(--teal);
+}
+
+.action-row strong {
+  display: block;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.action-row div:nth-child(2) {
+  min-width: 0;
+}
+
+.action-row div:nth-child(2) span {
+  display: block;
+  color: #8a98a3;
+  font-size: 9px;
+  margin-top: 3px;
+}
+
+.action-pill.critical {
+  background: #fbe9e7;
+  color: var(--critical);
+}
+
+.action-pill.medium {
+  background: #fff4d6;
+  color: #936c00;
+}
+
+.action-pill.low {
+  background: #e6f6f3;
+  color: var(--teal);
+}
+
+
+/* =====================================================
+   LOGIN
+   ===================================================== */
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 520px;
+  background: var(--bg);
+}
+
+.login-brand {
+  background: var(--navy);
+  color: white;
+  padding: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-brand h1 {
+  font-size: 52px;
+  margin: 20px 0 5px;
+}
+
+.login-brand p {
+  max-width: 500px;
+  color: rgba(255,255,255,.7);
+  line-height: 1.7;
+}
+
+.login-card {
+  align-self: center;
+  margin: 35px;
+  padding: 42px;
+  background: white;
+  border: 1px solid var(--gray);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(22,50,79,.08);
+}
+
+.login-card h2 {
+  font-size: 30px;
+  margin: 7px 0;
+}
+
+.muted {
+  color: #81909d;
+  font-size: 13px;
+  margin-bottom: 30px;
+}
+
+.login-card label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 17px 0 7px;
+}
+
+.input {
+  width: 100%;
+  height: 46px;
+  border: 1px solid var(--gray);
+  border-radius: 11px;
+  padding: 0 13px;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(15,157,138,.1);
+}
+
+.login-card .primary-button {
+  width: 100%;
+  margin-top: 25px;
+}
+
+.login-card .link-button {
+  width: 100%;
+  margin-top: 18px;
+}
+
+
+/* =====================================================
+   INSPECTA - LAYOUT Y RESPONSIVE DEFINITIVO
+   ===================================================== */
+
+/* La página completa puede crecer verticalmente */
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  height: auto;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Contenedor principal */
+.app-shell {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  display: flex;
+}
+
+.main-area {
+  width: calc(100% - 270px);
+  margin-left: 270px;
+  min-height: 100vh;
+  height: auto;
+}
+
+.content {
+  width: 100%;
+  min-height: calc(100vh - 84px);
+  height: auto;
+  padding: 30px;
+}
+
+/* Dashboard */
+.inspecta-dashboard {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  height: auto;
+  min-height: 0;
+}
+
+/* Todas las secciones pueden crecer */
+.dashboard-main-grid,
+.dashboard-lower-grid {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* =====================================================
+   TARJETAS INFERIORES
+   ===================================================== */
+
+.dashboard-lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.dashboard-lower-grid .dashboard-card {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+  overflow: hidden;
+}
+
+/* El contenido nunca debe quedar fuera */
+.inspection-list,
+.action-list {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* =====================================================
+   DESKTOP GRANDE
+   ===================================================== */
+
+@media (min-width: 1400px) {
+
+  .content {
+    padding: 32px 40px;
+  }
+
+  .dashboard-lower-grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(360px, 1fr);
+  }
+
+}
+
+
+/* =====================================================
+   LAPTOP
+   ===================================================== */
+
+@media (max-width: 1250px) {
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-lower-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-lower-grid .dashboard-card {
+    min-height: 300px;
+  }
+
+}
+
+
+/* =====================================================
+   TABLET
+   ===================================================== */
+
+@media (max-width: 900px) {
+
+  .sidebar {
+    width: 72px;
+    padding: 15px 10px;
+  }
+
+  .sidebar-brand {
+    justify-content: center;
+    padding: 5px 0 20px;
+  }
+
+  .sidebar-brand > div:last-child,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .nav-item {
+    font-size: 0;
+    text-align: center;
+    padding: 12px;
+  }
+
+  .main-area {
+    width: calc(100% - 72px);
+    margin-left: 72px;
+  }
+
+  .content {
+    padding: 22px;
+  }
+
+  .dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-actions {
+    width: 100%;
+  }
+
+  .date-button,
+  .dashboard-actions .primary-button {
+    flex: 1;
+  }
+
+  .compliance-content {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
+
+}
+
+
+/* =====================================================
+   TABLET PEQUEÑA / MÓVIL GRANDE
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+  .metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboard-main-grid,
+  .dashboard-lower-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-lower-grid .dashboard-card {
+    min-height: 0;
+  }
+
+  .inspection-row {
+    grid-template-columns: 38px minmax(0, 1fr) auto 16px;
+    min-height: 75px;
+  }
+
+  .inspection-date,
+  .inspection-progress {
+    display: none;
+  }
+
+}
+
+
+/* =====================================================
+   MÓVIL
+   ===================================================== */
+
+@media (max-width: 560px) {
+
+  .main-area {
+    width: calc(100% - 64px);
+    margin-left: 64px;
+  }
+
+  .sidebar {
+    width: 64px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .metric-card {
+    min-height: 135px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 25px;
+  }
+
+  .dashboard-header p {
+    font-size: 12px;
+  }
+
+  .dashboard-actions {
+    flex-direction: column;
+  }
+
+  .date-button,
+  .dashboard-actions .primary-button {
+    width: 100%;
+    flex: none;
+  }
+
+  .compliance-content {
+    grid-template-columns: 1fr;
+  }
+
+  .compliance-number {
+    margin-bottom: 5px;
+  }
+
+  .severity-summary {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .inspection-row {
+    grid-template-columns: 38px minmax(0, 1fr) 16px;
+    gap: 9px;
+  }
+
+  .inspection-date,
+  .inspection-progress,
+  .status-pill {
+    display: none;
+  }
+
+  .action-row {
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+  }
+
+  .action-row strong {
+    font-size: 10px;
+  }
+
+}
+
+
+/* =====================================================
+   MÓVIL MUY PEQUEÑO
+   ===================================================== */
+
+@media (max-width: 400px) {
+
+  .main-area {
+    width: calc(100% - 58px);
+    margin-left: 58px;
+  }
+
+  .sidebar {
+    width: 58px;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .card-header {
+    padding: 17px 16px 12px;
+  }
+
+  .inspection-list,
+  .action-list {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+}
+/* =====================================================
+   FIX DEFINITIVO DE SCROLL
+   Ionic bloquea el overflow del body
+   ===================================================== */
+
+html {
+  width: 100%;
+  min-height: 100%;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  height: auto !important;
+
+  margin: 0;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  height: auto !important;
+
+  overflow: visible !important;
+}
+
+.app-shell {
+  width: 100%;
+  min-height: 100vh;
+  height: auto !important;
+
+  overflow: visible !important;
+}
+
+.main-area {
+  min-height: 100vh;
+  height: auto !important;
+
+  overflow: visible !important;
+}
+
+.content {
+  min-height: calc(100vh - 84px);
+  height: auto !important;
+
+  overflow: visible !important;
+}
+
+.inspecta-dashboard {
+  height: auto !important;
+  min-height: 0;
+
+  overflow: visible !important;
+}
+
+.dashboard-lower-grid {
+  height: auto !important;
+  min-height: 0;
+
+  overflow: visible !important;
+}
+/* =====================================================
+   INSPECTA - SIDEBAR CON PERFIL
+   ===================================================== */
+
+.sidebar {
+  width: 270px;
+  background: var(--navy);
+  color: white;
+
+  position: fixed;
+  inset: 0 auto 0 0;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 20px 12px;
+
+  z-index: 100;
+}
+
+
+/* =====================================================
+   BRAND
+   ===================================================== */
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 5px 10px 24px;
+
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+.sidebar-brand-text strong {
+  display: block;
+
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: .3px;
+}
+
+.sidebar-brand-text span {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 10px;
+
+  color: rgba(255,255,255,.62);
+}
+
+
+/* =====================================================
+   NAV
+   ===================================================== */
+
+.sidebar-nav {
+  padding-top: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  color: rgba(255,255,255,.72);
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  transition:
+    background .2s ease,
+    color .2s ease,
+    transform .2s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,.07);
+
+  color: white;
+}
+
+.nav-item.active {
+  background: var(--teal);
+
+  color: white;
+
+  box-shadow:
+    0 8px 20px rgba(15,157,138,.18);
+}
+
+.nav-icon {
+  font-size: 18px;
+
+  flex-shrink: 0;
+}
+
+
+/* =====================================================
+   PARTE INFERIOR
+   ===================================================== */
+
+.sidebar-bottom {
+  margin-top: auto;
+
+  padding-top: 20px;
+}
+
+
+/* =====================================================
+   PERFIL
+   ===================================================== */
+
+.profile-container {
+  position: relative;
+
+  margin: 0 3px 15px;
+}
+
+.profile-card {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 10px;
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,.055);
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  transition: background .2s ease;
+}
+
+.profile-card:hover {
+  background: rgba(255,255,255,.09);
+}
+
+
+/* AVATAR */
+
+.profile-avatar {
+  width: 39px;
+  height: 39px;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
+
+  background: var(--teal);
+
+  color: white;
+
+  display: grid;
+  place-items: center;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+/* INFORMACIÓN */
+
+.profile-info {
+  min-width: 0;
+
+  flex: 1;
+}
+
+.profile-info strong {
+  display: block;
+
+  color: white;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.profile-info span {
+  display: block;
+
+  color: rgba(255,255,255,.52);
+
+  font-size: 9px;
+
+  margin-top: 3px;
+}
+
+
+/* BOTÓN */
+
+.profile-more {
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  border: 0;
+
+  border-radius: 9px;
+
+  background: transparent;
+
+  color: rgba(255,255,255,.55);
+
+  display: grid;
+  place-items: center;
+
+  font-size: 17px;
+
+  transition:
+    background .2s ease,
+    color .2s ease;
+}
+
+.profile-more:hover {
+  background: rgba(255,255,255,.1);
+
+  color: white;
+}
+
+
+/* =====================================================
+   MENÚ DEL PERFIL
+   ===================================================== */
+
+.profile-menu {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  bottom: calc(100% + 8px);
+
+  padding: 7px;
+
+  background: white;
+
+  border: 1px solid var(--gray);
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 15px 40px rgba(22,50,79,.18);
+
+  z-index: 200;
+}
+
+.profile-menu button {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  border: 0;
+
+  background: transparent;
+
+  color: var(--dark);
+
+  padding: 10px;
+
+  border-radius: 9px;
+
+  font-size: 11px;
+
+  text-align: left;
+}
+
+.profile-menu button:hover {
+  background: var(--bg);
+}
+
+.profile-menu ion-icon {
+  font-size: 16px;
+
+  color: var(--teal);
+}
+
+.profile-menu-divider {
+  height: 1px;
+
+  background: var(--gray);
+
+  margin: 5px 4px;
+}
+
+.profile-menu .logout-button {
+  color: var(--critical);
+}
+
+.profile-menu .logout-button ion-icon {
+  color: var(--critical);
+}
+
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+
+.sidebar-footer {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+  padding: 0 10px;
+}
+
+.sidebar-footer span {
+  font-size: 9px;
+
+  font-weight: 700;
+
+  color: rgba(255,255,255,.5);
+}
+
+.sidebar-footer small {
+  font-size: 8px;
+
+  color: rgba(255,255,255,.3);
+}
+
+
+/* =====================================================
+   MAIN AREA
+   ===================================================== */
+
+.main-area {
+  margin-left: 270px;
+
+  width: calc(100% - 270px);
+
+  min-height: 100vh;
+
+  background: var(--bg);
+}
+
+.main-area .content {
+  width: 100%;
+
+  min-height: 100vh;
+
+  padding: 34px;
+}
+
+
+/* =====================================================
+   ELIMINAR TOPBAR
+   ===================================================== */
+
+.topbar {
+  display: none !important;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 900px) {
+
+  .sidebar {
+    width: 76px;
+
+    padding:
+      18px 10px;
+  }
+
+  .sidebar-brand {
+    justify-content: center;
+
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .sidebar-brand-text {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+
+    padding: 12px;
+  }
+
+  .nav-item span {
+    display: none;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+  }
+
+  .profile-card {
+    justify-content: center;
+
+    padding: 8px;
+  }
+
+  .profile-info,
+  .profile-more {
+    display: none;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  .main-area {
+    margin-left: 76px;
+
+    width: calc(100% - 76px);
+  }
+
+  .main-area .content {
+    padding: 24px;
+  }
+
+}
+
+
+@media (max-width: 560px) {
+
+  .sidebar {
+    width: 64px;
+  }
+
+  .main-area {
+    margin-left: 64px;
+
+    width: calc(100% - 64px);
+  }
+
+  .main-area .content {
+    padding: 16px;
+  }
+
+}
+.dashboard-title-row {
+  display: flex;
+
+  align-items: flex-end;
+
+  justify-content: space-between;
+
+  gap: 30px;
+}
+
+.plant-selector {
+  border: 1px solid var(--gray);
+
+  background: white;
+
+  color: var(--dark);
+
+  border-radius: 11px;
+
+  padding: 11px 14px;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.plant-selector span {
+  color: var(--teal);
+
+  margin-left: 8px;
+
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+
+  .dashboard-title-row {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 15px;
+  }
+
+}
+
+/* =====================================================
+   INSPECTA - CORRECCIÓN FINAL DE LAYOUT
+   Mantiene el diseño existente y corrige el sidebar/scroll
+   ===================================================== */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+}
+
+html {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+#root {
+  min-height: 100vh;
+  overflow: visible !important;
+}
+
+.app-shell {
+  width: 100%;
+  min-height: 100vh;
+  height: auto !important;
+  display: flex;
+  overflow: visible !important;
+}
+
+/* Sidebar fijo y a toda la altura */
+.sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+
+  width: 270px !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* La navegación ocupa el espacio disponible.
+   Si algún día hay muchos elementos, solo ella puede hacer scroll. */
+.sidebar-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Perfil y footer permanecen abajo */
+.sidebar-bottom {
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+/* Área principal */
+.main-area {
+  width: calc(100% - 270px) !important;
+  min-width: 0;
+  min-height: 100vh !important;
+  height: auto !important;
+  margin-left: 270px !important;
+  background: var(--bg);
+  overflow: visible !important;
+}
+
+/* Todas las páginas pueden crecer verticalmente */
+.main-area .content,
+.content {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  height: auto !important;
+  box-sizing: border-box;
+  overflow: visible !important;
+}
+
+/* Evita que el contenido del dashboard fuerce alturas */
+.inspecta-dashboard,
+.dashboard-main-grid,
+.dashboard-lower-grid {
+  height: auto !important;
+  min-height: 0;
+  overflow: visible !important;
+}
+
+/* Las listas pueden mostrar todo su contenido */
+.inspection-list,
+.action-list {
+  height: auto;
+  max-height: none;
+}
+
+/* =====================================================
+   RESPONSIVE - mantiene el diseño existente
+   ===================================================== */
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 76px !important;
+  }
+
+  .main-area {
+    width: calc(100% - 76px) !important;
+    margin-left: 76px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .sidebar {
+    width: 64px !important;
+  }
+
+  .main-area {
+    width: calc(100% - 64px) !important;
+    margin-left: 64px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .sidebar {
+    width: 58px !important;
+  }
+
+  .main-area {
+    width: calc(100% - 58px) !important;
+    margin-left: 58px !important;
+  }
+}
+
+/* =====================================================
+   INSPECTA - ESCALA TIPOGRÁFICA FINAL
+   Mantiene el diseño existente y mejora la legibilidad.
+   ===================================================== */
+
+body {
+  font-size: 15px;
+}
+
+.sidebar-brand-text strong { font-size: 20px; }
+.sidebar-brand-text span { font-size: 11px; }
+.nav-item { font-size: 15px; }
+.sidebar-footer span { font-size: 10px; }
+.sidebar-footer small { font-size: 9px; }
+.profile-info strong { font-size: 12px; }
+.profile-info span { font-size: 10px; }
+.profile-menu button { font-size: 12px; }
+
+.eyebrow { font-size: 12px; }
+h1 { font-size: 32px; }
+.page-description { font-size: 15px; }
+
+.primary-button { font-size: 14px; }
+.link-button { font-size: 13px; }
+.date-button,
+.small-filter { font-size: 13px; }
+
+.dashboard-kicker { font-size: 11px; }
+.dashboard-header h1 { font-size: 32px; }
+.dashboard-header p { font-size: 14px; }
+
+.metric-top > span { font-size: 11px; }
+.metric-title { font-size: 13px; }
+.metric-value { font-size: 29px; }
+.metric-card small { font-size: 12px; }
+
+.card-label { font-size: 11px; }
+.card-header h2 { font-size: 17px; }
+
+.compliance-number strong { font-size: 40px; }
+.compliance-number span { font-size: 12px; }
+.compliance-number small { font-size: 10px; }
+
+.severity-item { font-size: 12px; }
+
+.inspection-info strong { font-size: 13px; }
+.inspection-info span { font-size: 11px; }
+.inspection-date { font-size: 11px; }
+
+.status-pill,
+.action-pill { font-size: 10px; }
+
+.inspection-progress strong { font-size: 11px; }
+.action-row strong { font-size: 12px; }
+.action-row div:nth-child(2) span { font-size: 11px; }
+
+.plant-selector { font-size: 13px; }
+
+/* =====================================================
+   SIDEBAR COLAPSABLE
+   ===================================================== */
+
+.sidebar {
+  transition: width .25s ease, padding .25s ease;
+}
+
+.sidebar-brand {
+  position: relative;
+  min-width: 0;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 14px;
+  right: -11px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--navy);
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22,50,79,.18);
+  z-index: 1001;
+  transition: transform .2s ease, background .2s ease, color .2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: var(--teal);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.sidebar.collapsed {
+  width: 82px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.sidebar.collapsed .sidebar-brand {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar.collapsed .sidebar-brand-text {
+  width: 0;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sidebar.collapsed .sidebar-nav {
+  align-items: center;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  width: 58px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar.collapsed .nav-item span {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin: 0;
+  font-size: 21px;
+}
+
+.sidebar.collapsed .profile-card {
+  justify-content: center;
+  gap: 0;
+  padding: 8px;
+}
+
+.sidebar.collapsed .profile-info,
+.sidebar.collapsed .profile-more,
+.sidebar.collapsed .sidebar-footer {
+  display: none;
+}
+
+.app-shell .main-area {
+  transition: margin-left .25s ease, width .25s ease;
+}
+
+.app-shell .sidebar.collapsed ~ .main-area {
+  margin-left: 82px !important;
+  width: calc(100% - 82px) !important;
+}
+
+@media (max-width: 900px) {
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar.collapsed {
+    width: 76px !important;
+  }
+
+  .app-shell .sidebar.collapsed ~ .main-area {
+    margin-left: 76px !important;
+    width: calc(100% - 76px) !important;
+  }
+
+  .nav-item {
+    font-size: 15px;
+  }
+
+  .content {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 560px) {
+  h1 {
+    font-size: 28px;
+  }
+
+  .page-description {
+    font-size: 14px;
+  }
+
+  .metric-title {
+    font-size: 12px;
+  }
+
+  .metric-value {
+    font-size: 27px;
+  }
+}
+
+/* =====================================================
+   INSPECTA - SIDEBAR FINAL
+   Corrección estructural del panel lateral.
+   No modifica la escala tipográfica ni los módulos.
+   ===================================================== */
+
+/* La página completa ocupa siempre el viewport */
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  height: 100%;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body {
+  height: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+/* Contenedor general */
+.app-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 100dvh;
+  height: auto;
+  overflow: visible !important;
+}
+
+/* =====================================================
+   SIDEBAR
+   ===================================================== */
+
+.sidebar {
+  position: fixed !important;
+
+  inset: 0 auto 0 0 !important;
+
+  width: 270px !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: none !important;
+
+  box-sizing: border-box !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  padding: 20px 12px !important;
+
+  margin: 0 !important;
+
+  background: var(--navy) !important;
+  color: #ffffff !important;
+
+  overflow: hidden !important;
+
+  z-index: 2000 !important;
+
+  isolation: isolate;
+}
+
+/* La navegación puede desplazarse solamente si llega a
+   faltar espacio vertical; el panel azul nunca desaparece. */
+.sidebar-nav {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  scrollbar-width: thin;
+}
+
+/* Perfil/footer quedan pegados a la parte inferior */
+.sidebar-bottom {
+  flex: 0 0 auto !important;
+  margin-top: auto !important;
+}
+
+/* =====================================================
+   CONTENIDO PRINCIPAL
+   ===================================================== */
+
+.main-area {
+  width: calc(100% - 270px) !important;
+  min-width: 0 !important;
+
+  min-height: 100dvh !important;
+  height: auto !important;
+
+  margin-left: 270px !important;
+
+  box-sizing: border-box !important;
+
+  background: var(--bg) !important;
+
+  overflow: visible !important;
+
+  transition:
+    margin-left .25s ease,
+    width .25s ease;
+}
+
+/* Contenido puede crecer sin afectar la altura del sidebar */
+.main-area .content,
+.content {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  min-height: 100dvh !important;
+  height: auto !important;
+
+  box-sizing: border-box !important;
+
+  overflow: visible !important;
+}
+
+/* =====================================================
+   SIDEBAR COLAPSADO
+   ===================================================== */
+
+.sidebar.collapsed {
+  width: 82px !important;
+  min-width: 82px !important;
+  max-width: 82px !important;
+
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.sidebar.collapsed .sidebar-brand {
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-brand-text {
+  width: 0 !important;
+  max-width: 0 !important;
+
+  margin: 0 !important;
+  opacity: 0 !important;
+
+  overflow: hidden !important;
+  pointer-events: none;
+}
+
+.sidebar.collapsed .sidebar-nav {
+  align-items: center !important;
+}
+
+.sidebar.collapsed .nav-item {
+  width: 58px !important;
+  min-width: 58px !important;
+
+  justify-content: center !important;
+
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.sidebar.collapsed .nav-item span {
+  width: 0 !important;
+  max-width: 0 !important;
+
+  opacity: 0 !important;
+
+  overflow: hidden !important;
+  pointer-events: none;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin: 0 !important;
+  font-size: 21px !important;
+}
+
+.sidebar.collapsed .profile-card {
+  justify-content: center !important;
+  gap: 0 !important;
+  padding: 8px !important;
+}
+
+.sidebar.collapsed .profile-info,
+.sidebar.collapsed .profile-more,
+.sidebar.collapsed .sidebar-footer {
+  display: none !important;
+}
+
+.app-shell .sidebar.collapsed ~ .main-area {
+  width: calc(100% - 82px) !important;
+  margin-left: 82px !important;
+}
+
+/* =====================================================
+   BOTÓN DE COLAPSAR
+   ===================================================== */
+
+.sidebar-toggle {
+  z-index: 2001 !important;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+  }
+
+  .sidebar-toggle {
+    display: none !important;
+  }
+
+  .main-area {
+    width: calc(100% - 76px) !important;
+    margin-left: 76px !important;
+  }
+
+  .app-shell .sidebar.collapsed ~ .main-area {
+    width: calc(100% - 76px) !important;
+    margin-left: 76px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .sidebar {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+  }
+
+  .main-area {
+    width: calc(100% - 64px) !important;
+    margin-left: 64px !important;
+  }
+
+  .app-shell .sidebar.collapsed ~ .main-area {
+    width: calc(100% - 64px) !important;
+    margin-left: 64px !important;
+  }
+
+  
+}
