@@ -1,6 +1,11 @@
+
 import { Navigate, Route, Routes } from "react-router-dom";
 import type { ReactNode } from "react";
-import { getAuthToken } from "./api/client";
+
+import {
+  getAuthToken,
+  getOrganizationId,
+} from "./api/client";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -12,21 +17,26 @@ import Checklists from "./pages/Checklists";
 import Normativa from "./pages/Normativa";
 import Reportes from "./pages/Reportes";
 import Administracion from "./pages/Administracion";
+import SeleccionOrganizacion from "./pages/SeleccionOrganizacion";
 
-function Placeholder({ title }: { title: string }) {
-  return (
-    <section className="page-section">
-      <span className="eyebrow">Módulo</span>
-      <h1>{title}</h1>
-      <p className="page-description">
-        Este módulo se implementará en la siguiente etapa.
-      </p>
-    </section>
-  );
+function RequireLogin({ children }: { children: ReactNode }) {
+  if (!getAuthToken()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
 }
 
-function RequireAuth({ children }: { children: ReactNode }) {
-  return getAuthToken() ? <>{children}</> : <Navigate to="/login" replace />;
+function RequireOrganization({ children }: { children: ReactNode }) {
+  if (!getAuthToken()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!getOrganizationId()) {
+    return <Navigate to="/seleccionar-organizacion" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 export default function App() {
@@ -34,7 +44,22 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
 
-      <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
+      <Route
+        path="/seleccionar-organizacion"
+        element={
+          <RequireLogin>
+            <SeleccionOrganizacion />
+          </RequireLogin>
+        }
+      />
+
+      <Route
+        element={
+          <RequireOrganization>
+            <AppLayout />
+          </RequireOrganization>
+        }
+      >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/inspecciones" element={<Inspecciones />} />
         <Route path="/incidencias" element={<Incidencias />} />
@@ -43,14 +68,12 @@ export default function App() {
           element={<AccionesCorrectivas />}
         />
         <Route path="/checklists" element={<Checklists />} />
-  
         <Route path="/normativa" element={<Normativa />} />
         <Route path="/reportes" element={<Reportes />} />
         <Route path="/administracion" element={<Administracion />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/login" replace />} />
-
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

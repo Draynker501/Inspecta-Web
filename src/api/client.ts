@@ -1,7 +1,9 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 const TOKEN_KEY = "inspecta_token";
+const USER_KEY = "inspecta_user";
+const ORGANIZATION_KEY = "inspecta_organization_id";
 
-type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
+type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown; };
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number, public readonly details?: unknown) {
@@ -15,6 +17,10 @@ export const getApiBaseUrl = () => API_BASE_URL;
 export const getAuthToken = () => localStorage.getItem(TOKEN_KEY);
 export const setAuthToken = (token: string) => localStorage.setItem(TOKEN_KEY, token);
 export const clearAuthToken = () => localStorage.removeItem(TOKEN_KEY);
+export const getOrganizationId = () => localStorage.getItem(ORGANIZATION_KEY);
+export const setOrganizationId = (id: string) => localStorage.setItem(ORGANIZATION_KEY, id);
+export const clearOrganizationId = () => localStorage.removeItem(ORGANIZATION_KEY);
+export const clearSession = () => {clearAuthToken(); clearOrganizationId(); localStorage.removeItem(USER_KEY);};
 
 function getErrorMessage(data: unknown, fallback: string): string {
   if (!data || typeof data !== "object") return fallback;
@@ -32,10 +38,21 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     throw new ApiError("Falta configurar VITE_API_BASE_URL en .env.local.", 0);
   }
 
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const isLoginRequest = normalizedPath === "/auth/login";
+
   const token = getAuthToken();
+  const organizationId = getOrganizationId();
   const headers = new Headers(options.headers);
   headers.set("Accept", "application/json");
-  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  if (token && !isLoginRequest) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  if (organizationId && !normalizedPath.startsWith("/auth/")) {
+    headers.set("X-Organization-Id", organizationId);
+  }
 
   let body: BodyInit | undefined;
   if (options.body !== undefined) {
@@ -49,7 +66,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`, {
+    response = await fetch(`${API_BASE_URL}${normalizedPath}`, {
       ...options,
       headers,
       body,
@@ -72,10 +89,12 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     responseData = await response.text();
   }
 
-  if (response.status === 401) clearAuthToken();
-  if (!response.ok) {
-    const fallback = `Error HTTP ${response.status}${response.statusText ? `: ${response.statusText}` : ""}`;
-    throw new ApiError(getErrorMessage(responseData, fallback), response.status, responseData);
+  if (response.status === 401 && !isLoginRequest) {clearSession();
   }
+
+  if (!response.ok) {const fallback = `Error HTTP ${response.status}${response.statusText ? `: ${response.statusText}` : "" }`;
+    throw new ApiError(getErrorMessage(responseData, fallback),response.status,responseData);
+  }
+
   return responseData as T;
 }
