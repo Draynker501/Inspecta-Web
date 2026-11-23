@@ -11,6 +11,7 @@ export interface Incident {
   inspection_id: string | null;
   question_id?: string | null;
   reported_by: string;
+  reporter_name?: string | null;
   plant_id: string;
   area_id: string;
   production_line_id: string | null;
