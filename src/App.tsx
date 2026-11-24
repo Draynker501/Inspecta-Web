@@ -18,6 +18,7 @@ import Normativa from "./pages/Normativa";
 import Reportes from "./pages/Reportes";
 import Administracion from "./pages/Administracion";
 import SeleccionOrganizacion from "./pages/SeleccionOrganizacion";
+import { OrganizationProvider } from "./contexts/OrganizationContext";
 
 function RequireLogin({ children }: { children: ReactNode }) {
   if (!getAuthToken()) {
@@ -56,7 +57,9 @@ export default function App() {
       <Route
         element={
           <RequireOrganization>
-            <AppLayout />
+            <OrganizationProvider>
+              <AppLayout />
+            </OrganizationProvider>
           </RequireOrganization>
         }
       >

@@ -20,7 +20,7 @@ export const clearAuthToken = () => localStorage.removeItem(TOKEN_KEY);
 export const getOrganizationId = () => localStorage.getItem(ORGANIZATION_KEY);
 export const setOrganizationId = (id: string) => localStorage.setItem(ORGANIZATION_KEY, id);
 export const clearOrganizationId = () => localStorage.removeItem(ORGANIZATION_KEY);
-export const clearSession = () => {clearAuthToken(); clearOrganizationId(); localStorage.removeItem(USER_KEY);};
+export const clearSession = () => { clearAuthToken(); clearOrganizationId(); localStorage.removeItem(USER_KEY); };
 
 function getErrorMessage(data: unknown, fallback: string): string {
   if (!data || typeof data !== "object") return fallback;
@@ -50,7 +50,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  if (organizationId && !normalizedPath.startsWith("/auth/")) {
+  const requiresOrganization =
+    !normalizedPath.startsWith("/auth/") ||
+    normalizedPath === "/auth/capabilities";
+
+  if (organizationId && requiresOrganization) {
     headers.set("X-Organization-Id", organizationId);
   }
 
@@ -89,11 +93,13 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     responseData = await response.text();
   }
 
-  if (response.status === 401 && !isLoginRequest) {clearSession();
+  if (response.status === 401 && !isLoginRequest) {
+    clearSession();
   }
 
-  if (!response.ok) {const fallback = `Error HTTP ${response.status}${response.statusText ? `: ${response.statusText}` : "" }`;
-    throw new ApiError(getErrorMessage(responseData, fallback),response.status,responseData);
+  if (!response.ok) {
+    const fallback = `Error HTTP ${response.status}${response.statusText ? `: ${response.statusText}` : ""}`;
+    throw new ApiError(getErrorMessage(responseData, fallback), response.status, responseData);
   }
 
   return responseData as T;

@@ -2358,3 +2358,207 @@ h1 {
     transition: none;
   }
 }
+
+/* =====================================================
+   ORGANIZACIÓN ACTIVA
+   ===================================================== */
+
+.sidebar-organization {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  gap: 10px;
+
+  min-width: 0;
+
+  margin: 14px 3px 0;
+  padding: 10px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, .055);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.sidebar-organization-icon {
+  display: grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  border-radius: 10px;
+
+  background: rgba(15, 157, 138, .16);
+  color: #5ed0be;
+
+  font-size: 20px;
+}
+
+.sidebar-organization-info {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1;
+  min-width: 0;
+
+  gap: 3px;
+}
+
+.sidebar-organization-info span {
+  color: rgba(255, 255, 255, .55);
+
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.sidebar-organization-info strong {
+  color: white;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sidebar-organization-info small {
+  color: rgba(255, 255, 255, .45);
+
+  font-size: 10px;
+}
+
+.sidebar-organization-info span,
+.sidebar-organization-info strong,
+.sidebar-organization-info small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   ORGANIZACIÓN - SIDEBAR CONTRAÍDO
+   ===================================================== */
+
+.sidebar-collapsed .sidebar-organization {
+  justify-content: center;
+
+  margin: 12px 0 0;
+  padding: 5px;
+}
+
+.sidebar-collapsed .sidebar-organization-info {
+  display: none;
+}
+
+.sidebar-collapsed .sidebar-organization-icon {
+  width: 34px;
+  height: 34px;
+
+  background: transparent;
+
+  font-size: 22px;
+}
+
+
+/* =====================================================
+   ROLES DEL USUARIO
+   ===================================================== */
+
+.profile-info span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   ESTADOS DEL CONTEXTO DE ORGANIZACIÓN
+   ===================================================== */
+
+.organization-state {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 320px;
+
+  padding: 30px;
+
+  text-align: center;
+
+  background: var(--white);
+  border: 1px solid var(--gray);
+  border-radius: 20px;
+}
+
+.organization-state h2 {
+  margin: 16px 0 8px;
+
+  color: var(--navy);
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.organization-state p {
+  max-width: 460px;
+
+  margin: 0 0 20px;
+
+  color: #71808f;
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.organization-spinner {
+  width: 36px;
+  height: 36px;
+
+  border: 3px solid var(--gray);
+  border-top-color: var(--teal);
+
+  border-radius: 50%;
+
+  animation: organization-spin .8s linear infinite;
+}
+
+.organization-error-icon {
+  color: var(--critical);
+
+  font-size: 38px;
+}
+
+@keyframes organization-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =====================================================
+   ORGANIZACIÓN - VENTANAS CON POCA ALTURA
+   ===================================================== */
+
+@media (max-height: 600px) {
+  .sidebar-organization {
+    margin-top: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
+
+
+/* =====================================================
+   ACCESIBILIDAD
+   ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .organization-spinner {
+    animation: none;
+  }
+}

@@ -9,9 +9,9 @@ import {
 export interface Organization {
   id: string;
   name: string;
-  code: string | null;
-  type: string;
-  status: string;
+  code: string;
+  type: "client";
+  status: boolean;
   membership_id: string;
   membership_status: string;
 }
