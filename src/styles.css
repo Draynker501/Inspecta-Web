@@ -870,13 +870,39 @@ html,
 body,
 #root {
   width: 100%;
+  min-width: 0;
   min-height: 100%;
   height: auto;
 }
 
-body {
+html {
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#root {
+  overflow: visible;
+}
+
+/* Solo bloquear el scroll del documento
+   cuando está montado el layout administrativo */
+
+html:has(#root > .app-shell),
+body:has(#root > .app-shell) {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root:has(> .app-shell) {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Contenedor principal */
@@ -1187,73 +1213,6 @@ body {
     padding-right: 16px;
   }
 
-}
-/* =====================================================
-   FIX DEFINITIVO DE SCROLL
-   Ionic bloquea el overflow del body
-   ===================================================== */
-
-html {
-  width: 100%;
-  min-height: 100%;
-  height: auto !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-
-body {
-  width: 100%;
-  min-height: 100vh;
-  height: auto !important;
-
-  margin: 0;
-
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-
-#root {
-  width: 100%;
-  min-height: 100vh;
-  height: auto !important;
-
-  overflow: visible !important;
-}
-
-.app-shell {
-  width: 100%;
-  min-height: 100vh;
-  height: auto !important;
-
-  overflow: visible !important;
-}
-
-.main-area {
-  min-height: 100vh;
-  height: auto !important;
-
-  overflow: visible !important;
-}
-
-.content {
-  min-height: calc(100vh - 84px);
-  height: auto !important;
-
-  overflow: visible !important;
-}
-
-.inspecta-dashboard {
-  height: auto !important;
-  min-height: 0;
-
-  overflow: visible !important;
-}
-
-.dashboard-lower-grid {
-  height: auto !important;
-  min-height: 0;
-
-  overflow: visible !important;
 }
 /* =====================================================
    INSPECTA - SIDEBAR CON PERFIL
@@ -1770,154 +1729,6 @@ body {
   }
 
 }
-
-/* =====================================================
-   INSPECTA - CORRECCIÓN FINAL DE LAYOUT
-   Mantiene el diseño existente y corrige el sidebar/scroll
-   ===================================================== */
-
-html,
-body,
-#root {
-  width: 100%;
-  min-width: 0;
-  min-height: 100%;
-}
-
-html {
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-
-body {
-  margin: 0;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-
-#root {
-  min-height: 100vh;
-  overflow: visible !important;
-}
-
-.app-shell {
-  width: 100%;
-  min-height: 100vh;
-  height: auto !important;
-  display: flex;
-  overflow: visible !important;
-}
-
-/* Sidebar fijo y a toda la altura */
-.sidebar {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-
-  width: 270px !important;
-  height: 100vh !important;
-  min-height: 100vh !important;
-
-  display: flex !important;
-  flex-direction: column !important;
-
-  box-sizing: border-box;
-
-  overflow: hidden;
-  z-index: 1000;
-}
-
-/* La navegación ocupa el espacio disponible.
-   Si algún día hay muchos elementos, solo ella puede hacer scroll. */
-.sidebar-nav {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Perfil y footer permanecen abajo */
-.sidebar-bottom {
-  flex: 0 0 auto;
-  margin-top: auto;
-}
-
-/* Área principal */
-.main-area {
-  width: calc(100% - 270px) !important;
-  min-width: 0;
-  min-height: 100vh !important;
-  height: auto !important;
-  margin-left: 270px !important;
-  background: var(--bg);
-  overflow: visible !important;
-}
-
-/* Todas las páginas pueden crecer verticalmente */
-.main-area .content,
-.content {
-  width: 100%;
-  min-width: 0;
-  min-height: 100vh;
-  height: auto !important;
-  box-sizing: border-box;
-  overflow: visible !important;
-}
-
-/* Evita que el contenido del dashboard fuerce alturas */
-.inspecta-dashboard,
-.dashboard-main-grid,
-.dashboard-lower-grid {
-  height: auto !important;
-  min-height: 0;
-  overflow: visible !important;
-}
-
-/* Las listas pueden mostrar todo su contenido */
-.inspection-list,
-.action-list {
-  height: auto;
-  max-height: none;
-}
-
-/* =====================================================
-   RESPONSIVE - mantiene el diseño existente
-   ===================================================== */
-
-@media (max-width: 900px) {
-  .sidebar {
-    width: 76px !important;
-  }
-
-  .main-area {
-    width: calc(100% - 76px) !important;
-    margin-left: 76px !important;
-  }
-}
-
-@media (max-width: 560px) {
-  .sidebar {
-    width: 64px !important;
-  }
-
-  .main-area {
-    width: calc(100% - 64px) !important;
-    margin-left: 64px !important;
-  }
-}
-
-@media (max-width: 400px) {
-  .sidebar {
-    width: 58px !important;
-  }
-
-  .main-area {
-    width: calc(100% - 58px) !important;
-    margin-left: 58px !important;
-  }
-}
-
 /* =====================================================
    INSPECTA - ESCALA TIPOGRÁFICA FINAL
    Mantiene el diseño existente y mejora la legibilidad.
@@ -1977,405 +1788,446 @@ h1 { font-size: 32px; }
 .plant-selector { font-size: 13px; }
 
 /* =====================================================
-   SIDEBAR COLAPSABLE
+   INSPECTA - LAYOUT ADMINISTRATIVO
    ===================================================== */
 
-.sidebar {
-  transition: width .25s ease, padding .25s ease;
-}
-
-.sidebar-brand {
-  position: relative;
-  min-width: 0;
-}
-
-.sidebar-toggle {
-  position: absolute;
-  top: 14px;
-  right: -11px;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 50%;
-  background: #ffffff;
-  color: var(--navy);
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(22,50,79,.18);
-  z-index: 1001;
-  transition: transform .2s ease, background .2s ease, color .2s ease;
-}
-
-.sidebar-toggle:hover {
-  background: var(--teal);
-  color: #ffffff;
-  transform: scale(1.05);
-}
-
-.sidebar.collapsed {
-  width: 82px !important;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-}
-
-.sidebar.collapsed .sidebar-brand {
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.sidebar.collapsed .sidebar-brand-text {
-  width: 0;
-  margin: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .sidebar-nav {
-  align-items: center;
-}
-
-.sidebar.collapsed .nav-item {
-  justify-content: center;
-  width: 58px;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.sidebar.collapsed .nav-item span {
-  width: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .nav-icon {
-  margin: 0;
-  font-size: 21px;
-}
-
-.sidebar.collapsed .profile-card {
-  justify-content: center;
-  gap: 0;
-  padding: 8px;
-}
-
-.sidebar.collapsed .profile-info,
-.sidebar.collapsed .profile-more,
-.sidebar.collapsed .sidebar-footer {
-  display: none;
-}
-
-.app-shell .main-area {
-  transition: margin-left .25s ease, width .25s ease;
-}
-
-.app-shell .sidebar.collapsed ~ .main-area {
-  margin-left: 82px !important;
-  width: calc(100% - 82px) !important;
-}
-
-@media (max-width: 900px) {
-  .sidebar-toggle {
-    display: none;
-  }
-
-  .sidebar.collapsed {
-    width: 76px !important;
-  }
-
-  .app-shell .sidebar.collapsed ~ .main-area {
-    margin-left: 76px !important;
-    width: calc(100% - 76px) !important;
-  }
-
-  .nav-item {
-    font-size: 15px;
-  }
-
-  .content {
-    padding: 22px;
-  }
-}
-
-@media (max-width: 560px) {
-  h1 {
-    font-size: 28px;
-  }
-
-  .page-description {
-    font-size: 14px;
-  }
-
-  .metric-title {
-    font-size: 12px;
-  }
-
-  .metric-value {
-    font-size: 27px;
-  }
-}
-
-/* =====================================================
-   INSPECTA - SIDEBAR FINAL
-   Corrección estructural del panel lateral.
-   No modifica la escala tipográfica ni los módulos.
-   ===================================================== */
-
-/* La página completa ocupa siempre el viewport */
-html,
-body,
-#root {
-  width: 100%;
-  min-width: 0;
-  min-height: 100%;
-  margin: 0;
-}
-
-html {
-  height: 100%;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-
-body {
-  height: 100%;
-  min-height: 100dvh;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-
-#root {
-  min-height: 100dvh;
-}
-
-/* Contenedor general */
 .app-shell {
-  position: relative;
-  display: block;
+  --sidebar-width: 270px;
+
+  display: flex;
   width: 100%;
   min-width: 0;
-  min-height: 100dvh;
-  height: auto;
-  overflow: visible !important;
+
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.app-shell.sidebar-collapsed {
+  --sidebar-width: 76px;
 }
 
 /* =====================================================
    SIDEBAR
    ===================================================== */
 
-.sidebar {
-  position: fixed !important;
+.app-shell > .sidebar {
+  position: relative;
+  inset: auto;
 
-  inset: 0 auto 0 0 !important;
+  flex: 0 0 var(--sidebar-width);
 
-  width: 270px !important;
-  height: 100dvh !important;
-  min-height: 100dvh !important;
-  max-height: none !important;
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  max-width: var(--sidebar-width);
 
-  box-sizing: border-box !important;
+  height: 100%;
+  min-height: 0;
 
-  display: flex !important;
-  flex-direction: column !important;
+  display: flex;
+  flex-direction: column;
 
-  padding: 20px 12px !important;
+  padding: 16px 12px;
+  margin: 0;
 
-  margin: 0 !important;
+  background: var(--navy);
+  color: white;
 
-  background: var(--navy) !important;
-  color: #ffffff !important;
+  overflow: visible;
 
-  overflow: hidden !important;
+  z-index: 10;
 
-  z-index: 2000 !important;
-
-  isolation: isolate;
+  transition:
+    width .22s ease,
+    min-width .22s ease,
+    max-width .22s ease,
+    flex-basis .22s ease;
 }
 
-/* La navegación puede desplazarse solamente si llega a
-   faltar espacio vertical; el panel azul nunca desaparece. */
-.sidebar-nav {
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
+/* =====================================================
+   BOTÓN PARA CONTRAER / EXPANDIR
+   ===================================================== */
 
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
+.sidebar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  flex-shrink: 0;
+
+  padding: 0 3px 10px;
+}
+
+.sidebar-toggle {
+  display: grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, .06);
+  color: rgba(255, 255, 255, .85);
+
+  font-size: 23px;
+
+  transition:
+    background .2s ease,
+    color .2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255, 255, 255, .14);
+  color: white;
+}
+
+.sidebar-toggle:focus-visible,
+.sidebar .nav-item:focus-visible,
+.sidebar .profile-more:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -2px;
+}
+
+/* =====================================================
+   ENCABEZADO
+   ===================================================== */
+
+.app-shell .sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  flex-shrink: 0;
+  min-width: 0;
+
+  gap: 12px;
+  padding: 5px 10px 24px;
+}
+
+.sidebar-brand .brand-mark {
+  flex-shrink: 0;
+}
+
+.app-shell .sidebar-brand-text {
+  display: block;
+  min-width: 0;
+
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* =====================================================
+   NAVEGACIÓN
+   ===================================================== */
+
+.sidebar .sidebar-nav {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1 1 auto;
+  min-height: 0;
+
+  gap: 5px;
+  padding-top: 20px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior-y: contain;
 
   scrollbar-width: thin;
+  scrollbar-color:
+    rgba(255, 255, 255, .25) transparent;
 }
 
-/* Perfil/footer quedan pegados a la parte inferior */
+.sidebar-nav .nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  flex-shrink: 0;
+  min-width: 0;
+
+  padding: 12px 14px;
+}
+
+.sidebar-nav .nav-item span {
+  display: block;
+  min-width: 0;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-nav .nav-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   PERFIL Y PIE DEL MENÚ
+   ===================================================== */
+
 .sidebar-bottom {
-  flex: 0 0 auto !important;
-  margin-top: auto !important;
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.app-shell .sidebar .profile-container {
+  margin: 0 3px 15px;
+}
+
+.app-shell .sidebar .profile-card {
+  flex-direction: row;
+  justify-content: flex-start;
+
+  gap: 10px;
+  padding: 10px;
+}
+
+.app-shell .sidebar .profile-info {
+  display: block;
+  min-width: 0;
+}
+
+.app-shell .sidebar .profile-more {
+  display: grid;
+}
+
+.app-shell .sidebar .sidebar-footer {
+  display: flex;
+}
+
+.app-shell .sidebar .profile-menu {
+  left: 0;
+  right: 0;
+
+  bottom: calc(100% + 8px);
+  width: auto;
+}
+
+/* =====================================================
+   SIDEBAR CONTRAÍDO
+   ===================================================== */
+
+.sidebar-collapsed > .sidebar {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.sidebar-collapsed .sidebar-controls {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-collapsed .sidebar-brand {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-collapsed .sidebar-brand-text {
+  display: none;
+}
+
+.sidebar-collapsed .sidebar-nav .nav-item {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar-collapsed .sidebar-nav .nav-item span {
+  display: none;
+}
+
+.sidebar-collapsed .sidebar-nav .nav-icon {
+  font-size: 21px;
+}
+
+.app-shell.sidebar-collapsed .sidebar .profile-container {
+  margin: 0;
+}
+
+.app-shell.sidebar-collapsed .sidebar .profile-card {
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 5px;
+  padding: 6px 2px;
+}
+
+.app-shell.sidebar-collapsed .sidebar .profile-info {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .sidebar .sidebar-footer {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .sidebar .profile-menu {
+  left: calc(100% + 12px);
+  right: auto;
+
+  bottom: 0;
+  width: 190px;
 }
 
 /* =====================================================
    CONTENIDO PRINCIPAL
    ===================================================== */
 
-.main-area {
-  width: calc(100% - 270px) !important;
-  min-width: 0 !important;
+.app-shell > .main-area {
+  flex: 1 1 0;
 
-  min-height: 100dvh !important;
-  height: auto !important;
+  width: auto;
+  min-width: 0;
 
-  margin-left: 270px !important;
+  height: 100%;
+  min-height: 0;
 
-  box-sizing: border-box !important;
+  margin: 0;
 
-  background: var(--bg) !important;
+  background: var(--bg);
 
-  overflow: visible !important;
+  overflow-y: auto;
+  overflow-x: auto;
 
-  transition:
-    margin-left .25s ease,
-    width .25s ease;
+  overscroll-behavior-y: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color: #b9c7d3 transparent;
 }
 
-/* Contenido puede crecer sin afectar la altura del sidebar */
-.main-area .content,
-.content {
-  width: 100% !important;
-  min-width: 0 !important;
+.app-shell > .main-area > .content {
+  width: 100%;
+  min-width: 0;
 
-  min-height: 100dvh !important;
-  height: auto !important;
+  min-height: 100%;
+  height: auto;
 
-  box-sizing: border-box !important;
+  padding: 34px;
 
-  overflow: visible !important;
+  box-sizing: border-box;
 }
 
 /* =====================================================
-   SIDEBAR COLAPSADO
+   RESPONSIVE - DESKTOP GRANDE
    ===================================================== */
 
-.sidebar.collapsed {
-  width: 82px !important;
-  min-width: 82px !important;
-  max-width: 82px !important;
-
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-}
-
-.sidebar.collapsed .sidebar-brand {
-  justify-content: center;
-}
-
-.sidebar.collapsed .sidebar-brand-text {
-  width: 0 !important;
-  max-width: 0 !important;
-
-  margin: 0 !important;
-  opacity: 0 !important;
-
-  overflow: hidden !important;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .sidebar-nav {
-  align-items: center !important;
-}
-
-.sidebar.collapsed .nav-item {
-  width: 58px !important;
-  min-width: 58px !important;
-
-  justify-content: center !important;
-
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-.sidebar.collapsed .nav-item span {
-  width: 0 !important;
-  max-width: 0 !important;
-
-  opacity: 0 !important;
-
-  overflow: hidden !important;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .nav-icon {
-  margin: 0 !important;
-  font-size: 21px !important;
-}
-
-.sidebar.collapsed .profile-card {
-  justify-content: center !important;
-  gap: 0 !important;
-  padding: 8px !important;
-}
-
-.sidebar.collapsed .profile-info,
-.sidebar.collapsed .profile-more,
-.sidebar.collapsed .sidebar-footer {
-  display: none !important;
-}
-
-.app-shell .sidebar.collapsed ~ .main-area {
-  width: calc(100% - 82px) !important;
-  margin-left: 82px !important;
+@media (min-width: 1400px) {
+  .app-shell > .main-area > .content {
+    padding: 32px 40px;
+  }
 }
 
 /* =====================================================
-   BOTÓN DE COLAPSAR
-   ===================================================== */
-
-.sidebar-toggle {
-  z-index: 2001 !important;
-}
-
-/* =====================================================
-   RESPONSIVE
+   RESPONSIVE - TABLET
    ===================================================== */
 
 @media (max-width: 900px) {
-  .sidebar {
-    width: 76px !important;
-    min-width: 76px !important;
-    max-width: 76px !important;
+  .app-shell.sidebar-expanded {
+    --sidebar-width: 240px;
   }
 
-  .sidebar-toggle {
-    display: none !important;
+  .app-shell.sidebar-collapsed {
+    --sidebar-width: 76px;
   }
 
-  .main-area {
-    width: calc(100% - 76px) !important;
-    margin-left: 76px !important;
+  .app-shell.sidebar-expanded .sidebar-brand-text {
+    display: block;
   }
 
-  .app-shell .sidebar.collapsed ~ .main-area {
-    width: calc(100% - 76px) !important;
-    margin-left: 76px !important;
+  .app-shell > .main-area > .content {
+    padding: 24px;
   }
 }
 
+/* =====================================================
+   RESPONSIVE - MÓVIL
+   ===================================================== */
+
 @media (max-width: 560px) {
-  .sidebar {
-    width: 64px !important;
-    min-width: 64px !important;
-    max-width: 64px !important;
+  .app-shell.sidebar-expanded {
+    --sidebar-width: 220px;
   }
 
-  .main-area {
-    width: calc(100% - 64px) !important;
-    margin-left: 64px !important;
+  .app-shell.sidebar-collapsed {
+    --sidebar-width: 64px;
   }
 
-  .app-shell .sidebar.collapsed ~ .main-area {
-    width: calc(100% - 64px) !important;
-    margin-left: 64px !important;
+  .app-shell.sidebar-collapsed > .sidebar {
+    padding-left: 6px;
+    padding-right: 6px;
   }
 
-  
+  .app-shell > .main-area > .content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .app-shell.sidebar-collapsed {
+    --sidebar-width: 58px;
+  }
+
+  .app-shell.sidebar-collapsed > .sidebar {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .app-shell > .main-area > .content {
+    padding: 12px;
+  }
+}
+
+/* =====================================================
+   VENTANAS CON POCA ALTURA
+   ===================================================== */
+
+@media (max-height: 600px) {
+  .app-shell > .sidebar {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .sidebar-controls {
+    padding-bottom: 5px;
+  }
+
+  .app-shell .sidebar-brand {
+    padding-bottom: 12px;
+  }
+
+  .sidebar .sidebar-nav {
+    padding-top: 10px;
+  }
+
+  .sidebar-bottom {
+    padding-top: 10px;
+  }
+
+  .app-shell .sidebar .sidebar-footer {
+    display: none;
+  }
+}
+
+/* =====================================================
+   ACCESIBILIDAD - MOVIMIENTO REDUCIDO
+   ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell > .sidebar,
+  .sidebar-toggle,
+  .sidebar .nav-item {
+    transition: none;
+  }
 }
