@@ -26,6 +26,7 @@ import {
   logOutOutline,
   menuOutline,
   businessOutline,
+  swapHorizontalOutline,
 } from "ionicons/icons";
 
 const SIDEBAR_STORAGE_KEY = "inspecta_sidebar_collapsed";
@@ -249,6 +250,16 @@ export default function AppLayout() {
   };
 
   /* =====================================================
+   CAMBIAR ORGANIZACIÓN
+   ===================================================== */
+
+  const handleChangeOrganization = () => {
+    setProfileOpen(false);
+
+    navigate("/seleccionar-organizacion?mode=switch");
+  };
+
+  /* =====================================================
      CERRAR SESIÓN
      ===================================================== */
 
@@ -425,6 +436,14 @@ export default function AppLayout() {
                 >
                   <IonIcon icon={settingsOutline} />
                   <span>Configuración</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleChangeOrganization}
+                >
+                  <IonIcon icon={swapHorizontalOutline} />
+                  <span>Cambiar organización</span>
                 </button>
 
                 <div className="profile-menu-divider" />

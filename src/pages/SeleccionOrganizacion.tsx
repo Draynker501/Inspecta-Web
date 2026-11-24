@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Paper,
   Typography,
@@ -12,24 +16,60 @@ import {
 
 import {
   getOrganizations,
+  getSelectedOrganizationId,
   selectOrganization,
+  unselectOrganization,
   type Organization,
 } from "../services/organizations.service";
 
 import { logout } from "../services/auth.service";
-import { clearSession } from "../api/client";
+
+import {
+  clearSession,
+  getAuthToken,
+} from "../api/client";
 
 export default function SeleccionOrganizacion() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const isSwitchMode = searchParams.get("mode") === "switch";
+
+  const [currentOrganizationId] = useState(
+    getSelectedOrganizationId
+  );
+
+  const [organizations, setOrganizations] =
+    useState<Organization[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const currentOrganization = organizations.find(
+    (organization) =>
+      organization.id === currentOrganizationId
+  );
+
+  const canCancel =
+    isSwitchMode &&
+    !loading &&
+    !error &&
+    Boolean(currentOrganization);
+
+  /* =====================================================
+     CARGAR ORGANIZACIONES DISPONIBLES
+     ===================================================== */
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadOrganizations() {
+      setLoading(true);
+      setError("");
+      setOrganizations([]);
+
       try {
         const result = await getOrganizations();
 
@@ -37,12 +77,38 @@ export default function SeleccionOrganizacion() {
 
         setOrganizations(result);
 
-        if (result.length === 1) {
+        // Eliminar una selección que ya no está disponible.
+        const selectedId = getSelectedOrganizationId();
+
+        if (
+          selectedId &&
+          !result.some(
+            (organization) =>
+              organization.id === selectedId
+          )
+        ) {
+          unselectOrganization();
+        }
+
+        // Selección automática únicamente después del login.
+        if (!isSwitchMode && result.length === 1) {
           selectOrganization(result[0]);
-          navigate("/dashboard", { replace: true });
+
+          navigate("/dashboard", {
+            replace: true,
+          });
         }
       } catch (err) {
         if (cancelled) return;
+
+        // La sesión pudo haber expirado.
+        if (!getAuthToken()) {
+          navigate("/login", {
+            replace: true,
+          });
+
+          return;
+        }
 
         setError(
           err instanceof Error
@@ -61,22 +127,89 @@ export default function SeleccionOrganizacion() {
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, isSwitchMode, reloadKey]);
+
+  /* =====================================================
+     SELECCIONAR ORGANIZACIÓN
+     ===================================================== */
 
   const handleSelect = (organization: Organization) => {
-    selectOrganization(organization);
-    navigate("/dashboard", { replace: true });
+    if (loading || error || loggingOut) {
+      return;
+    }
+
+    const availableOrganization = organizations.find(
+      (item) => item.id === organization.id
+    );
+
+    if (!availableOrganization) {
+      setError(
+        "La organización seleccionada no está disponible."
+      );
+
+      return;
+    }
+
+    if (!getAuthToken()) {
+      navigate("/login", {
+        replace: true,
+      });
+
+      return;
+    }
+
+    selectOrganization(availableOrganization);
+
+    navigate("/dashboard", {
+      replace: true,
+    });
   };
 
+  /* =====================================================
+     CANCELAR CAMBIO DE ORGANIZACIÓN
+     ===================================================== */
+
+  const handleCancel = () => {
+    if (!canCancel || !currentOrganization || loggingOut) {
+      return;
+    }
+
+    handleSelect(currentOrganization);
+  };
+
+  /* =====================================================
+     REINTENTAR CONSULTA
+     ===================================================== */
+
+  const handleRetry = () => {
+    setReloadKey((previous) => previous + 1);
+  };
+
+  /* =====================================================
+     CERRAR SESIÓN
+     ===================================================== */
+
   const handleLogout = async () => {
+    if (loggingOut) {
+      return;
+    }
+
+    setLoggingOut(true);
+
     try {
       await logout();
     } catch {
       clearSession();
     } finally {
-      navigate("/login", { replace: true });
+      navigate("/login", {
+        replace: true,
+      });
     }
   };
+
+  /* =====================================================
+     INTERFAZ
+     ===================================================== */
 
   return (
     <Box
@@ -94,7 +227,10 @@ export default function SeleccionOrganizacion() {
         sx={{
           width: "100%",
           maxWidth: 520,
-          p: 4,
+          p: {
+            xs: 3,
+            sm: 4,
+          },
           borderRadius: 2,
         }}
       >
@@ -106,78 +242,205 @@ export default function SeleccionOrganizacion() {
             mb: 2,
           }}
         >
-          Seleccionar organización
+          {isSwitchMode
+            ? "Cambiar organización"
+            : "Seleccionar organización"}
         </Typography>
 
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
-          Selecciona la organización con la que deseas trabajar en Inspecta.
+        <Typography
+          color="text.secondary"
+          sx={{ mb: 3 }}
+        >
+          {isSwitchMode
+            ? "Selecciona la organización con la que deseas continuar trabajando."
+            : "Selecciona la organización con la que deseas trabajar en Inspecta."}
         </Typography>
+
+        {/* ESTADO DE CARGA */}
 
         {loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              py: 4,
+            }}
+          >
             <CircularProgress />
           </Box>
         )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+        {/* ERROR DE CONSULTA */}
+
+        {!loading && error && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={handleRetry}
+                disabled={loggingOut}
+              >
+                Reintentar
+              </Button>
+            }
+          >
             {error}
           </Alert>
         )}
 
-        {!loading && !error && organizations.length === 0 && (
-          <Alert severity="warning">
-            Tu usuario no tiene organizaciones activas disponibles.
-            Contacta al administrador para revisar tu membresía.
-          </Alert>
-        )}
+        {/* SIN ORGANIZACIONES DISPONIBLES */}
 
         {!loading &&
-          organizations.map((organization) => (
-            <Button
-              key={organization.id}
-              variant="outlined"
-              fullWidth
-              onClick={() => handleSelect(organization)}
-              sx={{
-                mb: 1.5,
-                py: 1.5,
-                justifyContent: "flex-start",
-                textAlign: "left",
-                borderColor: "#DCE6EE",
-                color: "#16324F",
-              }}
-            >
-              <Box>
-                <Typography
-                  sx={{
-                    fontWeight: 700,
-                  }}
-                >
-                  {organization.name}
-                </Typography>
+          !error &&
+          organizations.length === 0 && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Tu usuario no tiene organizaciones activas
+              disponibles. Contacta al administrador para
+              revisar tu membresía.
+            </Alert>
+          )}
 
-                {organization.code && (
+        {/* ORGANIZACIÓN ANTERIOR NO DISPONIBLE */}
+
+        {isSwitchMode &&
+          !loading &&
+          !error &&
+          currentOrganizationId &&
+          !currentOrganization &&
+          organizations.length > 0 && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Ya no tienes acceso a la organización anterior.
+              Selecciona otra organización para continuar.
+            </Alert>
+          )}
+
+        {/* UNA SOLA ORGANIZACIÓN */}
+
+        {isSwitchMode &&
+          !loading &&
+          !error &&
+          organizations.length === 1 &&
+          currentOrganization && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Actualmente solo tienes acceso a una
+              organización.
+            </Alert>
+          )}
+
+        {/* LISTA DE ORGANIZACIONES */}
+
+        {!loading &&
+          !error &&
+          organizations.map((organization) => {
+            const isCurrent =
+              isSwitchMode &&
+              organization.id === currentOrganizationId;
+
+            return (
+              <Button
+                key={organization.id}
+                variant="outlined"
+                fullWidth
+                disabled={loggingOut}
+                onClick={() => handleSelect(organization)}
+                sx={{
+                  mb: 1.5,
+                  py: 1.5,
+                  px: 2,
+                  justifyContent: "space-between",
+                  textAlign: "left",
+                  textTransform: "none",
+                  gap: 2,
+                  borderColor: isCurrent
+                    ? "#0F9D8A"
+                    : "#DCE6EE",
+                  bgcolor: isCurrent
+                    ? "rgba(15, 157, 138, .06)"
+                    : "transparent",
+                  color: "#16324F",
+
+                  "&:hover": {
+                    borderColor: "#0F9D8A",
+                    bgcolor: "rgba(15, 157, 138, .09)",
+                  },
+                }}
+              >
+                <Box sx={{ minWidth: 0 }}>
                   <Typography
-                    variant="caption"
                     sx={{
-                      display: "block",
+                      fontWeight: 700,
+                      overflowWrap: "anywhere",
                     }}
                   >
-                    Código: {organization.code}
+                    {organization.name}
                   </Typography>
+
+                  {organization.code && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: "block",
+                        color: "text.secondary",
+                      }}
+                    >
+                      Código: {organization.code}
+                    </Typography>
+                  )}
+                </Box>
+
+                {isCurrent && (
+                  <Chip
+                    label="Actual"
+                    size="small"
+                    sx={{
+                      flexShrink: 0,
+                      bgcolor: "rgba(15, 157, 138, .12)",
+                      color: "#087F70",
+                      fontWeight: 600,
+                    }}
+                  />
                 )}
-              </Box>
-            </Button>
-          ))}
+              </Button>
+            );
+          })}
+
+        {/* CANCELAR CAMBIO */}
+
+        {canCancel && (
+          <Button
+            variant="outlined"
+            fullWidth
+            disabled={loggingOut}
+            onClick={handleCancel}
+            sx={{
+              mt: 2,
+              borderColor: "#DCE6EE",
+              color: "#16324F",
+              textTransform: "none",
+            }}
+          >
+            Cancelar cambio
+          </Button>
+        )}
+
+        {/* CERRAR SESIÓN */}
 
         <Button
           fullWidth
           color="inherit"
+          disabled={loggingOut}
           onClick={() => void handleLogout()}
-          sx={{ mt: 2 }}
+          sx={{
+            mt: 2,
+            textTransform: "none",
+          }}
         >
-          Cerrar sesión
+          {loggingOut
+            ? "Cerrando sesión..."
+            : "Cerrar sesión"}
         </Button>
       </Paper>
     </Box>
