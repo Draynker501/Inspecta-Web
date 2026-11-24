@@ -9,6 +9,7 @@ import {
 import { IonIcon } from "@ionic/react";
 import { clearAuthToken } from "../api/client";
 import { getStoredUser, logout } from "../services/auth.service";
+import inspectaLogo from "../assets/inspecta-logo.png";
 
 import {
   gridOutline,
@@ -113,10 +114,10 @@ export default function AppLayout() {
   const userRole =
     Array.isArray(user?.roles) && user.roles.length
       ? (
-          typeof user.roles[0] === "string"
-            ? user.roles[0]
-            : user.roles[0]?.name
-        ) ?? "Usuario"
+        typeof user.roles[0] === "string"
+          ? user.roles[0]
+          : user.roles[0]?.name
+      ) ?? "Usuario"
       : user?.role ?? "Usuario";
 
   /* =====================================================
@@ -252,11 +253,10 @@ export default function AppLayout() {
 
   return (
     <div
-      className={`app-shell ${
-        sidebarCollapsed
+      className={`app-shell ${sidebarCollapsed
           ? "sidebar-collapsed"
           : "sidebar-expanded"
-      }`}
+        }`}
     >
       {/* =====================================================
           SIDEBAR
@@ -296,8 +296,11 @@ export default function AppLayout() {
         {/* LOGO */}
 
         <div className="sidebar-brand">
-          <div className="brand-mark small">
-            I
+          <div className="sidebar-logo">
+            <img
+              src={inspectaLogo}
+              alt="Logo de INSPECTA"
+            />
           </div>
 
           <div className="sidebar-brand-text">

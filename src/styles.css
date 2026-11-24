@@ -68,7 +68,7 @@ button {
   align-items: center;
   gap: 12px;
   padding: 5px 10px 25px;
-  border-bottom: 1px solid rgba(255,255,255,.12);
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
 }
 
 .sidebar-brand strong {
@@ -108,7 +108,7 @@ button {
 }
 
 .nav-item {
-  color: rgba(255,255,255,.75);
+  color: rgba(255, 255, 255, .75);
   text-decoration: none;
   padding: 12px 14px;
   border-radius: 12px;
@@ -116,7 +116,7 @@ button {
 }
 
 .nav-item:hover {
-  background: rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, .08);
   color: white;
 }
 
@@ -350,7 +350,7 @@ h1 {
   margin-bottom: 13px;
 }
 
-.metric-top > span {
+.metric-top>span {
   font-size: 9px;
   color: #9aa6b0;
 }
@@ -425,10 +425,10 @@ h1 {
 
 .dashboard-card {
   width: 100%;
-  background: rgba(255,255,255,.95);
-  border: 1px solid rgba(220,230,238,.9);
+  background: rgba(255, 255, 255, .95);
+  border: 1px solid rgba(220, 230, 238, .9);
   border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(22,50,79,.025);
+  box-shadow: 0 8px 30px rgba(22, 50, 79, .025);
 
   /*
     Importante:
@@ -594,12 +594,7 @@ h1 {
 
   display: grid;
   grid-template-columns:
-    38px
-    minmax(130px, 1fr)
-    65px
-    90px
-    90px
-    16px;
+    38px minmax(130px, 1fr) 65px 90px 90px 16px;
 
   align-items: center;
   gap: 10px;
@@ -804,7 +799,7 @@ h1 {
 
 .login-brand p {
   max-width: 500px;
-  color: rgba(255,255,255,.7);
+  color: rgba(255, 255, 255, .7);
   line-height: 1.7;
 }
 
@@ -815,7 +810,7 @@ h1 {
   background: white;
   border: 1px solid var(--gray);
   border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(22,50,79,.08);
+  box-shadow: 0 20px 60px rgba(22, 50, 79, .08);
 }
 
 .login-card h2 {
@@ -847,7 +842,7 @@ h1 {
 
 .input:focus {
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(15,157,138,.1);
+  box-shadow: 0 0 0 3px rgba(15, 157, 138, .1);
 }
 
 .login-card .primary-button {
@@ -1030,7 +1025,7 @@ body:has(#root > .app-shell) {
     padding: 5px 0 20px;
   }
 
-  .sidebar-brand > div:last-child,
+  .sidebar-brand>div:last-child,
   .sidebar-footer {
     display: none;
   }
@@ -1214,6 +1209,7 @@ body:has(#root > .app-shell) {
   }
 
 }
+
 /* =====================================================
    INSPECTA - SIDEBAR CON PERFIL
    ===================================================== */
@@ -1246,7 +1242,7 @@ body:has(#root > .app-shell) {
 
   padding: 5px 10px 24px;
 
-  border-bottom: 1px solid rgba(255,255,255,.12);
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
 }
 
 .sidebar-brand-text strong {
@@ -1264,7 +1260,7 @@ body:has(#root > .app-shell) {
 
   font-size: 10px;
 
-  color: rgba(255,255,255,.62);
+  color: rgba(255, 255, 255, .62);
 }
 
 
@@ -1293,7 +1289,7 @@ body:has(#root > .app-shell) {
 
   border-radius: 12px;
 
-  color: rgba(255,255,255,.72);
+  color: rgba(255, 255, 255, .72);
 
   text-decoration: none;
 
@@ -1307,7 +1303,7 @@ body:has(#root > .app-shell) {
 }
 
 .nav-item:hover {
-  background: rgba(255,255,255,.07);
+  background: rgba(255, 255, 255, .07);
 
   color: white;
 }
@@ -1318,7 +1314,7 @@ body:has(#root > .app-shell) {
   color: white;
 
   box-shadow:
-    0 8px 20px rgba(15,157,138,.18);
+    0 8px 20px rgba(15, 157, 138, .18);
 }
 
 .nav-icon {
@@ -1360,15 +1356,15 @@ body:has(#root > .app-shell) {
 
   border-radius: 14px;
 
-  background: rgba(255,255,255,.055);
+  background: rgba(255, 255, 255, .055);
 
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, .08);
 
   transition: background .2s ease;
 }
 
 .profile-card:hover {
-  background: rgba(255,255,255,.09);
+  background: rgba(255, 255, 255, .09);
 }
 
 
@@ -1420,7 +1416,7 @@ body:has(#root > .app-shell) {
 .profile-info span {
   display: block;
 
-  color: rgba(255,255,255,.52);
+  color: rgba(255, 255, 255, .52);
 
   font-size: 9px;
 
@@ -1442,7 +1438,7 @@ body:has(#root > .app-shell) {
 
   background: transparent;
 
-  color: rgba(255,255,255,.55);
+  color: rgba(255, 255, 255, .55);
 
   display: grid;
   place-items: center;
@@ -1455,7 +1451,7 @@ body:has(#root > .app-shell) {
 }
 
 .profile-more:hover {
-  background: rgba(255,255,255,.1);
+  background: rgba(255, 255, 255, .1);
 
   color: white;
 }
@@ -1482,7 +1478,7 @@ body:has(#root > .app-shell) {
   border-radius: 14px;
 
   box-shadow:
-    0 15px 40px rgba(22,50,79,.18);
+    0 15px 40px rgba(22, 50, 79, .18);
 
   z-index: 200;
 }
@@ -1557,13 +1553,13 @@ body:has(#root > .app-shell) {
 
   font-weight: 700;
 
-  color: rgba(255,255,255,.5);
+  color: rgba(255, 255, 255, .5);
 }
 
 .sidebar-footer small {
   font-size: 8px;
 
-  color: rgba(255,255,255,.3);
+  color: rgba(255, 255, 255, .3);
 }
 
 
@@ -1682,6 +1678,7 @@ body:has(#root > .app-shell) {
   }
 
 }
+
 .dashboard-title-row {
   display: flex;
 
@@ -1729,6 +1726,7 @@ body:has(#root > .app-shell) {
   }
 
 }
+
 /* =====================================================
    INSPECTA - ESCALA TIPOGRÁFICA FINAL
    Mantiene el diseño existente y mejora la legibilidad.
@@ -1738,54 +1736,147 @@ body {
   font-size: 15px;
 }
 
-.sidebar-brand-text strong { font-size: 20px; }
-.sidebar-brand-text span { font-size: 11px; }
-.nav-item { font-size: 15px; }
-.sidebar-footer span { font-size: 10px; }
-.sidebar-footer small { font-size: 9px; }
-.profile-info strong { font-size: 12px; }
-.profile-info span { font-size: 10px; }
-.profile-menu button { font-size: 12px; }
+.sidebar-brand-text strong {
+  font-size: 20px;
+}
 
-.eyebrow { font-size: 12px; }
-h1 { font-size: 32px; }
-.page-description { font-size: 15px; }
+.sidebar-brand-text span {
+  font-size: 11px;
+}
 
-.primary-button { font-size: 14px; }
-.link-button { font-size: 13px; }
+.nav-item {
+  font-size: 15px;
+}
+
+.sidebar-footer span {
+  font-size: 10px;
+}
+
+.sidebar-footer small {
+  font-size: 9px;
+}
+
+.profile-info strong {
+  font-size: 12px;
+}
+
+.profile-info span {
+  font-size: 10px;
+}
+
+.profile-menu button {
+  font-size: 12px;
+}
+
+.eyebrow {
+  font-size: 12px;
+}
+
+h1 {
+  font-size: 32px;
+}
+
+.page-description {
+  font-size: 15px;
+}
+
+.primary-button {
+  font-size: 14px;
+}
+
+.link-button {
+  font-size: 13px;
+}
+
 .date-button,
-.small-filter { font-size: 13px; }
+.small-filter {
+  font-size: 13px;
+}
 
-.dashboard-kicker { font-size: 11px; }
-.dashboard-header h1 { font-size: 32px; }
-.dashboard-header p { font-size: 14px; }
+.dashboard-kicker {
+  font-size: 11px;
+}
 
-.metric-top > span { font-size: 11px; }
-.metric-title { font-size: 13px; }
-.metric-value { font-size: 29px; }
-.metric-card small { font-size: 12px; }
+.dashboard-header h1 {
+  font-size: 32px;
+}
 
-.card-label { font-size: 11px; }
-.card-header h2 { font-size: 17px; }
+.dashboard-header p {
+  font-size: 14px;
+}
 
-.compliance-number strong { font-size: 40px; }
-.compliance-number span { font-size: 12px; }
-.compliance-number small { font-size: 10px; }
+.metric-top>span {
+  font-size: 11px;
+}
 
-.severity-item { font-size: 12px; }
+.metric-title {
+  font-size: 13px;
+}
 
-.inspection-info strong { font-size: 13px; }
-.inspection-info span { font-size: 11px; }
-.inspection-date { font-size: 11px; }
+.metric-value {
+  font-size: 29px;
+}
+
+.metric-card small {
+  font-size: 12px;
+}
+
+.card-label {
+  font-size: 11px;
+}
+
+.card-header h2 {
+  font-size: 17px;
+}
+
+.compliance-number strong {
+  font-size: 40px;
+}
+
+.compliance-number span {
+  font-size: 12px;
+}
+
+.compliance-number small {
+  font-size: 10px;
+}
+
+.severity-item {
+  font-size: 12px;
+}
+
+.inspection-info strong {
+  font-size: 13px;
+}
+
+.inspection-info span {
+  font-size: 11px;
+}
+
+.inspection-date {
+  font-size: 11px;
+}
 
 .status-pill,
-.action-pill { font-size: 10px; }
+.action-pill {
+  font-size: 10px;
+}
 
-.inspection-progress strong { font-size: 11px; }
-.action-row strong { font-size: 12px; }
-.action-row div:nth-child(2) span { font-size: 11px; }
+.inspection-progress strong {
+  font-size: 11px;
+}
 
-.plant-selector { font-size: 13px; }
+.action-row strong {
+  font-size: 12px;
+}
+
+.action-row div:nth-child(2) span {
+  font-size: 11px;
+}
+
+.plant-selector {
+  font-size: 13px;
+}
 
 /* =====================================================
    INSPECTA - LAYOUT ADMINISTRATIVO
@@ -1814,7 +1905,7 @@ h1 { font-size: 32px; }
    SIDEBAR
    ===================================================== */
 
-.app-shell > .sidebar {
+.app-shell>.sidebar {
   position: relative;
   inset: auto;
 
@@ -1923,6 +2014,41 @@ h1 { font-size: 32px; }
   overflow: hidden;
 }
 
+.sidebar-logo {
+  width: 54px;
+  height: 54px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  background-color: #FFFFFF;
+  border-radius: 12px;
+
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.sidebar-logo img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}
+
+/* Logo con sidebar contraído */
+
+.sidebar-collapsed .sidebar-logo {
+  width: 44px;
+  height: 44px;
+
+  padding: 6px;
+  border-radius: 10px;
+}
+
 /* =====================================================
    NAVEGACIÓN
    ===================================================== */
@@ -2019,7 +2145,7 @@ h1 { font-size: 32px; }
    SIDEBAR CONTRAÍDO
    ===================================================== */
 
-.sidebar-collapsed > .sidebar {
+.sidebar-collapsed>.sidebar {
   padding-left: 10px;
   padding-right: 10px;
 }
@@ -2085,7 +2211,7 @@ h1 { font-size: 32px; }
    CONTENIDO PRINCIPAL
    ===================================================== */
 
-.app-shell > .main-area {
+.app-shell>.main-area {
   flex: 1 1 0;
 
   width: auto;
@@ -2107,7 +2233,7 @@ h1 { font-size: 32px; }
   scrollbar-color: #b9c7d3 transparent;
 }
 
-.app-shell > .main-area > .content {
+.app-shell>.main-area>.content {
   width: 100%;
   min-width: 0;
 
@@ -2124,7 +2250,7 @@ h1 { font-size: 32px; }
    ===================================================== */
 
 @media (min-width: 1400px) {
-  .app-shell > .main-area > .content {
+  .app-shell>.main-area>.content {
     padding: 32px 40px;
   }
 }
@@ -2146,7 +2272,7 @@ h1 { font-size: 32px; }
     display: block;
   }
 
-  .app-shell > .main-area > .content {
+  .app-shell>.main-area>.content {
     padding: 24px;
   }
 }
@@ -2164,12 +2290,12 @@ h1 { font-size: 32px; }
     --sidebar-width: 64px;
   }
 
-  .app-shell.sidebar-collapsed > .sidebar {
+  .app-shell.sidebar-collapsed>.sidebar {
     padding-left: 6px;
     padding-right: 6px;
   }
 
-  .app-shell > .main-area > .content {
+  .app-shell>.main-area>.content {
     padding: 16px;
   }
 }
@@ -2179,12 +2305,12 @@ h1 { font-size: 32px; }
     --sidebar-width: 58px;
   }
 
-  .app-shell.sidebar-collapsed > .sidebar {
+  .app-shell.sidebar-collapsed>.sidebar {
     padding-left: 5px;
     padding-right: 5px;
   }
 
-  .app-shell > .main-area > .content {
+  .app-shell>.main-area>.content {
     padding: 12px;
   }
 }
@@ -2194,7 +2320,7 @@ h1 { font-size: 32px; }
    ===================================================== */
 
 @media (max-height: 600px) {
-  .app-shell > .sidebar {
+  .app-shell>.sidebar {
     padding-top: 10px;
     padding-bottom: 10px;
   }
@@ -2225,7 +2351,8 @@ h1 { font-size: 32px; }
    ===================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .app-shell > .sidebar,
+
+  .app-shell>.sidebar,
   .sidebar-toggle,
   .sidebar .nav-item {
     transition: none;
