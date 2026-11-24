@@ -170,15 +170,17 @@ export default function SortableQuestion({
                     <Stack
                         direction="row"
                         useFlexGap
-                        flexWrap="wrap"
                         spacing={0.75}
-                        sx={{ mt: 1.25 }}
+                        sx={{
+                            flexWrap: "wrap",
+                            mt: 1.25,
+                        }}
                     >
                         <Chip
                             size="small"
                             label={
                                 QUESTION_TYPE_LABELS[
-                                    question.answer_type
+                                question.answer_type
                                 ]
                             }
                             sx={{
@@ -208,8 +210,8 @@ export default function SortableQuestion({
                             }
                             onClick={
                                 editable &&
-                                !disabled &&
-                                !orderChanged
+                                    !disabled &&
+                                    !orderChanged
                                     ? () => onStatus(question)
                                     : undefined
                             }
@@ -247,8 +249,10 @@ export default function SortableQuestion({
                 <Stack
                     direction="row"
                     spacing={0.5}
-                    alignItems="center"
-                    sx={{ flexShrink: 0 }}
+                    sx={{
+                        alignItems: "center",
+                        flexShrink: 0,
+                    }}
                 >
                     <Tooltip title="Consultar pregunta">
                         <span>

@@ -189,7 +189,7 @@ export default function SortableSection({
                     <Stack
                         direction="row"
                         spacing={0.5}
-                        alignItems="center"
+                        sx={{ alignItems: "center" }}
                     >
                         <Tooltip title="Editar sección">
                             <span>

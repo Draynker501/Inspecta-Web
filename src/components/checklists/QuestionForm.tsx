@@ -73,7 +73,7 @@ export default function QuestionForm({
 
     const [options, setOptions] = useState<QuestionOption[]>(
         question?.options?.map((option) => ({ ...option })) ??
-            emptyOptions()
+        emptyOptions()
     );
 
     const [displayOrder, setDisplayOrder] = useState(
@@ -353,7 +353,7 @@ export default function QuestionForm({
                                         key={index}
                                         direction="row"
                                         spacing={1}
-                                        alignItems="center"
+                                        sx={{ alignItems: "center" }}
                                     >
                                         <TextField
                                             label={`Etiqueta ${index + 1}`}

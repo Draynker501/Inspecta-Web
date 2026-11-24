@@ -433,9 +433,11 @@ export default function NormRequirements({
                         >
                             <Stack
                                 direction="row"
-                                justifyContent="space-between"
-                                alignItems="flex-start"
                                 spacing={2}
+                                sx={{
+                                    justifyContent: "space-between",
+                                    alignItems: "flex-start",
+                                }}
                             >
                                 <Box sx={{ minWidth: 0 }}>
                                     <Typography
@@ -694,10 +696,12 @@ export default function NormRequirements({
                                 sm: "row",
                             }}
                             spacing={1.5}
-                            justifyContent="space-between"
-                            alignItems={{
-                                xs: "stretch",
-                                sm: "center",
+                            sx={{
+                                justifyContent: "space-between",
+                                alignItems: {
+                                    xs: "stretch",
+                                    sm: "center",
+                                },
                             }}
                         >
                             <Typography
@@ -713,8 +717,8 @@ export default function NormRequirements({
                             <Stack
                                 direction="row"
                                 spacing={1}
-                                flexWrap="wrap"
                                 useFlexGap
+                                sx={{ flexWrap: "wrap" }}
                             >
                                 <Button
                                     variant="outlined"
@@ -766,9 +770,11 @@ export default function NormRequirements({
                         {/* Listado de requisitos */}
                         {loading ? (
                             <Stack
-                                alignItems="center"
                                 spacing={1.5}
-                                sx={{ py: 5 }}
+                                sx={{
+                                    alignItems: "center",
+                                    py: 5,
+                                }}
                             >
                                 <CircularProgress
                                     size={30}
@@ -807,7 +813,7 @@ export default function NormRequirements({
                             >
                                 <Stack
                                     spacing={1.5}
-                                    alignItems="center"
+                                    sx={{ alignItems: "center" }}
                                 >
                                     <ListAltOutlinedIcon
                                         sx={{
@@ -823,10 +829,8 @@ export default function NormRequirements({
                                         }}
                                     >
                                         {requirements.length === 0
-                                            ? editable
-                                                ? "Registra el primer requisito de esta norma."
-                                                : "Reactiva la norma para registrar requisitos."
-                                            : "Intenta modificar los filtros de búsqueda."}
+                                            ? "Sin requisitos registrados"
+                                            : "No se encontraron requisitos"}
                                     </Typography>
 
                                     <Typography
@@ -836,7 +840,9 @@ export default function NormRequirements({
                                         }}
                                     >
                                         {requirements.length === 0
-                                            ? "Registra el primer requisito de esta norma."
+                                            ? editable
+                                                ? "Registra el primer requisito de esta norma."
+                                                : "Reactiva la norma para registrar requisitos."
                                             : "Intenta modificar los filtros de búsqueda."}
                                     </Typography>
 
@@ -876,7 +882,7 @@ export default function NormRequirements({
                                                 <Stack
                                                     direction="row"
                                                     spacing={1.5}
-                                                    alignItems="flex-start"
+                                                    sx={{ alignItems: "flex-start" }}
                                                 >
                                                     <Box
                                                         sx={{
@@ -1066,8 +1072,10 @@ export default function NormRequirements({
                 <DialogContent dividers>
                     {detailLoading ? (
                         <Stack
-                            alignItems="center"
-                            sx={{ py: 4 }}
+                            sx={{
+                                alignItems: "center",
+                                py: 4,
+                            }}
                         >
                             <CircularProgress
                                 size={28}

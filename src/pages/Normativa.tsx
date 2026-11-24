@@ -880,8 +880,10 @@ export default function Normativa() {
                 {loading ? (
                   <Stack
                     spacing={1.5}
-                    alignItems="center"
-                    sx={{ py: 6 }}
+                    sx={{
+                      alignItems: "center",
+                      py: 6,
+                    }}
                   >
                     <CircularProgress
                       size={30}
@@ -905,8 +907,10 @@ export default function Normativa() {
                     }}
                   >
                     <Typography
-                      color="text.secondary"
-                      fontSize={14}
+                      sx={{
+                        color: "text.secondary",
+                        fontSize: 14,
+                      }}
                     >
                       No fue posible cargar
                       el catálogo normativo.
@@ -962,8 +966,10 @@ export default function Normativa() {
                               />
                             ) : (
                               <Typography
-                                color="text.secondary"
-                                fontSize={12}
+                                sx={{
+                                  color: "text.secondary",
+                                  fontSize: 12,
+                                }}
                               >
                                 —
                               </Typography>
@@ -1106,8 +1112,10 @@ export default function Normativa() {
                     {normasFiltradas.length === 0 && (
                       <Stack
                         spacing={1}
-                        alignItems="center"
-                        sx={{ py: 6 }}
+                        sx={{
+                          alignItems: "center",
+                          py: 6,
+                        }}
                       >
                         <GavelIcon
                           sx={{
@@ -1228,8 +1236,10 @@ export default function Normativa() {
         <DialogContent dividers>
           {detailLoading ? (
             <Stack
-              alignItems="center"
-              sx={{ py: 4 }}
+              sx={{
+                alignItems: "center",
+                py: 4,
+              }}
             >
               <CircularProgress
                 size={28}
@@ -1252,8 +1262,10 @@ export default function Normativa() {
                 <Stack
                   direction="row"
                   spacing={1}
-                  justifyContent="space-between"
-                  alignItems="center"
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
                   <Typography
                     sx={{

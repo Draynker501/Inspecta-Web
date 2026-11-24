@@ -578,8 +578,10 @@ export default function QuestionNormRequirements({
                             <Stack
                                 direction="row"
                                 spacing={1}
-                                justifyContent="space-between"
-                                alignItems="center"
+                                sx={{
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                }}
                             >
                                 <Typography
                                     sx={{
@@ -699,13 +701,15 @@ export default function QuestionNormRequirements({
                             <Stack
                                 direction="row"
                                 spacing={1}
-                                alignItems="center"
-                                justifyContent="space-between"
+                                sx={{
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                }}
                             >
                                 <Stack
                                     direction="row"
                                     spacing={1}
-                                    alignItems="center"
+                                    sx={{ alignItems: "center" }}
                                 >
                                     <LinkIcon
                                         sx={{ color: GREEN }}
@@ -751,9 +755,11 @@ export default function QuestionNormRequirements({
 
                             {linksLoading ? (
                                 <Stack
-                                    alignItems="center"
                                     spacing={1}
-                                    sx={{ py: 3 }}
+                                    sx={{
+                                        alignItems: "center",
+                                        py: 3,
+                                    }}
                                 >
                                     <CircularProgress
                                         size={26}
@@ -834,8 +840,10 @@ export default function QuestionNormRequirements({
                                     <Stack
                                         direction="row"
                                         spacing={1}
-                                        alignItems="center"
-                                        justifyContent="space-between"
+                                        sx={{
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                        }}
                                     >
                                         <Typography
                                             sx={{
@@ -897,7 +905,7 @@ export default function QuestionNormRequirements({
                                         <Stack
                                             direction="row"
                                             spacing={1.5}
-                                            alignItems="center"
+                                            sx={{ alignItems: "center" }}
                                         >
                                             <CircularProgress
                                                 size={20}
@@ -1045,9 +1053,11 @@ export default function QuestionNormRequirements({
 
                                             {requirementsLoading ? (
                                                 <Stack
-                                                    alignItems="center"
                                                     spacing={1}
-                                                    sx={{ py: 3 }}
+                                                    sx={{
+                                                        alignItems: "center",
+                                                        py: 3,
+                                                    }}
                                                 >
                                                     <CircularProgress
                                                         size={26}
@@ -1120,8 +1130,10 @@ export default function QuestionNormRequirements({
                                                                             <Stack
                                                                                 direction="row"
                                                                                 spacing={1}
-                                                                                justifyContent="space-between"
-                                                                                alignItems="center"
+                                                                                sx={{
+                                                                                    justifyContent: "space-between",
+                                                                                    alignItems: "center",
+                                                                                }}
                                                                             >
                                                                                 <Box
                                                                                     sx={{

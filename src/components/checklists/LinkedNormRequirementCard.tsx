@@ -52,8 +52,10 @@ export default function LinkedNormRequirementCard({
                     <Stack
                         direction="row"
                         spacing={1}
-                        alignItems="center"
-                        justifyContent="space-between"
+                        sx={{
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
                     >
                         <Typography
                             sx={{
@@ -102,8 +104,10 @@ export default function LinkedNormRequirementCard({
                 <Stack
                     direction="row"
                     spacing={1}
-                    alignItems="center"
-                    justifyContent="space-between"
+                    sx={{
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}
                 >
                     <Box sx={{ minWidth: 0 }}>
                         <Typography
@@ -132,8 +136,10 @@ export default function LinkedNormRequirementCard({
                     <Stack
                         direction="row"
                         spacing={1}
-                        alignItems="center"
-                        sx={{ flexShrink: 0 }}
+                        sx={{
+                            alignItems: "center",
+                            flexShrink: 0,
+                        }}
                     >
                         <Chip
                             size="small"
