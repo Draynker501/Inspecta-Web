@@ -43,6 +43,7 @@ import {
 
 import SortableQuestion from "./SortableQuestion";
 import QuestionForm from "./QuestionForm";
+import QuestionNormRequirements from "./QuestionNormRequirements";
 
 import {
     getAllChecklistQuestions,
@@ -123,6 +124,9 @@ export default function ChecklistSectionQuestions({
     const [viewing, setViewing] =
         useState<ChecklistQuestion | null>(null);
 
+    const [normQuestion, setNormQuestion] =
+        useState<ChecklistQuestion | null>(null);
+
     const [statusTarget, setStatusTarget] =
         useState<ChecklistQuestion | null>(null);
 
@@ -150,6 +154,7 @@ export default function ChecklistSectionQuestions({
         formOpen ||
         Boolean(viewing) ||
         Boolean(statusTarget) ||
+        Boolean(normQuestion) ||
         confirmClose;
 
     const activeCount = questions.filter(
@@ -843,6 +848,7 @@ export default function ChecklistSectionQuestions({
                                                     onEdit={openEdit}
                                                     onView={setViewing}
                                                     onStatus={openStatus}
+                                                    onNormRequirements={setNormQuestion}
                                                     onMove={moveQuestion}
                                                 />
                                             )
@@ -1283,6 +1289,16 @@ export default function ChecklistSectionQuestions({
                     </Button>
                 </DialogActions>
             </Dialog>
+            {/* Vinculaciones normativas de la pregunta */}
+            {normQuestion && (
+                <QuestionNormRequirements
+                    key={normQuestion.id}
+                    question={normQuestion}
+                    version={version}
+                    onClose={() => setNormQuestion(null)}
+                    onChanged={onChanged}
+                />
+            )}
         </>
     );
 }

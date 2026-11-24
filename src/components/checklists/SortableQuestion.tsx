@@ -1,3 +1,4 @@
+
 import {
     Box,
     Chip,
@@ -14,6 +15,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
+import LinkIcon from "@mui/icons-material/Link";
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -34,6 +36,7 @@ interface Props {
     onEdit: (question: ChecklistQuestion) => void;
     onView: (question: ChecklistQuestion) => void;
     onStatus: (question: ChecklistQuestion) => void;
+    onNormRequirements: (question: ChecklistQuestion) => void;
     onMove: (from: number, to: number) => void;
 }
 
@@ -47,6 +50,7 @@ export default function SortableQuestion({
     onEdit,
     onView,
     onStatus,
+    onNormRequirements,
     onMove,
 }: Props) {
     const {
@@ -244,6 +248,7 @@ export default function SortableQuestion({
                     direction="row"
                     spacing={0.5}
                     alignItems="center"
+                    sx={{ flexShrink: 0 }}
                 >
                     <Tooltip title="Consultar pregunta">
                         <span>
@@ -254,6 +259,33 @@ export default function SortableQuestion({
                                 sx={{ color: NAVY }}
                             >
                                 <VisibilityOutlinedIcon fontSize="small" />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+
+                    {/* Vinculaciones normativas */}
+                    <Tooltip
+                        title={
+                            orderChanged
+                                ? "Guarda o descarta los cambios de orden"
+                                : editable
+                                    ? "Administrar vinculaciones normativas"
+                                    : "Consultar vinculaciones normativas"
+                        }
+                    >
+                        <span>
+                            <IconButton
+                                size="small"
+                                disabled={disabled || orderChanged}
+                                onClick={() =>
+                                    onNormRequirements(question)
+                                }
+                                aria-label="Vinculaciones normativas"
+                                sx={{
+                                    color: editable ? GREEN : NAVY,
+                                }}
+                            >
+                                <LinkIcon fontSize="small" />
                             </IconButton>
                         </span>
                     </Tooltip>
