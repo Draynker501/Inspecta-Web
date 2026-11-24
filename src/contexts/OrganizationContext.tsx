@@ -9,7 +9,13 @@ import {
 
 import type { ReactNode } from "react";
 
-import { getOrganizationId } from "../api/client";
+import {
+  API_ACCESS_EVENT,
+  getAuthToken,
+  getOrganizationId,
+  invalidateOrganization,
+  invalidateSession,
+} from "../api/client";
 
 import {
   getOrganizations,
@@ -30,6 +36,10 @@ import type {
   ModuleKey,
 } from "../services/capabilities.service";
 
+/* =====================================================
+   TIPOS DEL CONTEXTO
+   ===================================================== */
+
 interface OrganizationContextValue {
   organization: Organization | null;
   organizations: Organization[];
@@ -48,7 +58,13 @@ interface OrganizationProviderProps {
 }
 
 const OrganizationContext =
-  createContext<OrganizationContextValue | undefined>(undefined);
+  createContext<OrganizationContextValue | undefined>(
+    undefined
+  );
+
+/* =====================================================
+   PROVIDER
+   ===================================================== */
 
 export function OrganizationProvider({
   children,
@@ -64,37 +80,65 @@ export function OrganizationProvider({
 
   const [loading, setLoading] = useState(true);
 
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] =
+    useState<string | null>(null);
 
-  const requestRef = useRef<AbortController | null>(null);
+  const requestRef =
+    useRef<AbortController | null>(null);
+
+  /* =====================================================
+     LIMPIAR CONTEXTO
+     ===================================================== */
+
+  const clearContext = useCallback(() => {
+    setOrganization(null);
+    setOrganizations([]);
+    setCapabilities(null);
+  }, []);
+
+  /* =====================================================
+     CARGAR ORGANIZACIÓN Y CAPACIDADES
+     ===================================================== */
 
   const refresh = useCallback(async () => {
-    // Cancelar cualquier solicitud anterior.
     requestRef.current?.abort();
 
     const controller = new AbortController();
 
     requestRef.current = controller;
 
+    const token = getAuthToken();
     const organizationId = getOrganizationId();
 
-    // Evitar conservar información de un contexto anterior.
-    setOrganization(null);
-    setOrganizations([]);
-    setCapabilities(null);
+    clearContext();
+
     setError(null);
     setLoading(true);
 
+    const isCurrentRequest = () =>
+      !controller.signal.aborted &&
+      getAuthToken() === token &&
+      getOrganizationId() === organizationId;
+
     try {
-      if (!organizationId) {
-        throw new Error(
-          "No hay una organización seleccionada."
-        );
+      if (!token) {
+        invalidateSession();
+        return;
       }
 
-      const availableOrganizations = await getOrganizations();
+      if (!organizationId) {
+        invalidateOrganization(
+          "organization_required",
+          "No hay una organización seleccionada."
+        );
 
-      if (controller.signal.aborted) {
+        return;
+      }
+
+      const availableOrganizations =
+        await getOrganizations();
+
+      if (!isCurrentRequest()) {
         return;
       }
 
@@ -104,29 +148,24 @@ export function OrganizationProvider({
         );
 
       if (!selectedOrganization) {
-        throw new Error(
+        invalidateOrganization(
+          "organization_access_denied",
           "Ya no tienes acceso a la organización seleccionada."
         );
-      }
 
-      const organizationCapabilities = await getCapabilities(
-        controller.signal
-      );
-
-      if (controller.signal.aborted) {
         return;
       }
 
-      // Comprobar que la organización no cambió durante la solicitud.
-      if (getOrganizationId() !== organizationId) {
-        throw new Error(
-          "La organización seleccionada cambió durante la consulta."
-        );
+      const organizationCapabilities =
+        await getCapabilities(controller.signal);
+
+      if (!isCurrentRequest()) {
+        return;
       }
 
-      // Impedir que se utilicen capacidades de otra organización.
       if (
-        organizationCapabilities.organization_id !== organizationId
+        organizationCapabilities.organization_id !==
+        organizationId
       ) {
         throw new Error(
           "Las capacidades recibidas no corresponden a la organización activa."
@@ -137,13 +176,11 @@ export function OrganizationProvider({
       setOrganization(selectedOrganization);
       setCapabilities(organizationCapabilities);
     } catch (err) {
-      if (controller.signal.aborted) {
+      if (!isCurrentRequest()) {
         return;
       }
 
-      setOrganization(null);
-      setOrganizations([]);
-      setCapabilities(null);
+      clearContext();
 
       setError(
         err instanceof Error
@@ -151,11 +188,42 @@ export function OrganizationProvider({
           : "No fue posible cargar la información de la organización."
       );
     } finally {
-      if (!controller.signal.aborted) {
+      if (isCurrentRequest()) {
         setLoading(false);
       }
     }
-  }, []);
+  }, [clearContext]);
+
+  /* =====================================================
+     ESCUCHAR INVALIDACIÓN DE ACCESO
+     ===================================================== */
+
+  useEffect(() => {
+    const handleAccessInvalidated = () => {
+      requestRef.current?.abort();
+
+      clearContext();
+
+      setError(null);
+      setLoading(true);
+    };
+
+    window.addEventListener(
+      API_ACCESS_EVENT,
+      handleAccessInvalidated
+    );
+
+    return () => {
+      window.removeEventListener(
+        API_ACCESS_EVENT,
+        handleAccessInvalidated
+      );
+    };
+  }, [clearContext]);
+
+  /* =====================================================
+     INICIALIZAR CONTEXTO
+     ===================================================== */
 
   useEffect(() => {
     void refresh();
@@ -164,6 +232,10 @@ export function OrganizationProvider({
       requestRef.current?.abort();
     };
   }, [refresh]);
+
+  /* =====================================================
+     CONSULTAR CAPACIDADES
+     ===================================================== */
 
   const hasModule = useCallback(
     (module: ModuleKey): boolean => {
@@ -192,6 +264,10 @@ export function OrganizationProvider({
     </OrganizationContext.Provider>
   );
 }
+
+/* =====================================================
+   HOOK DEL CONTEXTO
+   ===================================================== */
 
 export function useOrganization(): OrganizationContextValue {
   const context = useContext(OrganizationContext);

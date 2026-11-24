@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   useNavigate,
   useSearchParams,
+  useLocation,
 } from "react-router-dom";
 
 import {
@@ -31,9 +32,19 @@ import {
 
 export default function SeleccionOrganizacion() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [searchParams] = useSearchParams();
 
-  const isSwitchMode = searchParams.get("mode") === "switch";
+  const mode = searchParams.get("mode");
+
+  const isSwitchMode = mode === "switch";
+  const isRecoveryMode = mode === "recovery";
+
+  const accessMessage =
+    typeof location.state?.accessMessage === "string"
+      ? location.state.accessMessage
+      : null;
 
   const [currentOrganizationId] = useState(
     getSelectedOrganizationId
@@ -91,7 +102,11 @@ export default function SeleccionOrganizacion() {
         }
 
         // Selección automática únicamente después del login.
-        if (!isSwitchMode && result.length === 1) {
+        if (
+          !isSwitchMode &&
+          !isRecoveryMode &&
+          result.length === 1
+        ) {
           selectOrganization(result[0]);
 
           navigate("/dashboard", {
@@ -127,7 +142,12 @@ export default function SeleccionOrganizacion() {
     return () => {
       cancelled = true;
     };
-  }, [navigate, isSwitchMode, reloadKey]);
+  }, [
+    navigate,
+    isSwitchMode,
+    isRecoveryMode,
+    reloadKey,
+  ]);
 
   /* =====================================================
      SELECCIONAR ORGANIZACIÓN
@@ -251,10 +271,19 @@ export default function SeleccionOrganizacion() {
           color="text.secondary"
           sx={{ mb: 3 }}
         >
-          {isSwitchMode
-            ? "Selecciona la organización con la que deseas continuar trabajando."
-            : "Selecciona la organización con la que deseas trabajar en Inspecta."}
+          {isRecoveryMode
+            ? "Selecciona una organización disponible para continuar utilizando Inspecta."
+            : isSwitchMode
+              ? "Selecciona la organización con la que deseas continuar trabajando."
+              : "Selecciona la organización con la que deseas trabajar en Inspecta."}
         </Typography>
+
+        {isRecoveryMode && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            {accessMessage ??
+              "Ya no tienes acceso a la organización anterior. Selecciona otra organización para continuar."}
+          </Alert>
+        )}
 
         {/* ESTADO DE CARGA */}
 
