@@ -12,6 +12,8 @@ import { getStoredUser, logout } from "../services/auth.service";
 import inspectaLogo from "../assets/inspecta-logo.png";
 import { useOrganization } from "../contexts/OrganizationContext";
 
+import type { ModuleKey } from "../services/capabilities.service";
+
 import {
   gridOutline,
   clipboardOutline,
@@ -32,46 +34,61 @@ import {
 const SIDEBAR_STORAGE_KEY = "inspecta_sidebar_collapsed";
 const SIDEBAR_BREAKPOINT = "(max-width: 900px)";
 
-const items = [
+interface NavigationItem {
+  label: string;
+  path: string;
+  icon: string;
+  capability: ModuleKey;
+}
+
+const items: NavigationItem[] = [
   {
     label: "Dashboard",
     path: "/dashboard",
     icon: gridOutline,
+    capability: "dashboard",
   },
   {
     label: "Inspecciones",
     path: "/inspecciones",
     icon: clipboardOutline,
+    capability: "inspections",
   },
   {
     label: "Incidencias",
     path: "/incidencias",
     icon: warningOutline,
+    capability: "incidents",
   },
   {
     label: "Acciones correctivas",
     path: "/acciones-correctivas",
     icon: checkmarkDoneOutline,
+    capability: "corrective_actions",
   },
   {
     label: "Checklists",
     path: "/checklists",
     icon: listOutline,
+    capability: "checklists",
   },
   {
     label: "Normativa",
     path: "/normativa",
     icon: documentTextOutline,
+    capability: "norms",
   },
   {
     label: "Reportes",
     path: "/reportes",
     icon: barChartOutline,
+    capability: "reports",
   },
   {
     label: "Administración",
     path: "/administracion",
     icon: settingsOutline,
+    capability: "administration",
   },
 ];
 
@@ -107,7 +124,19 @@ export default function AppLayout() {
     loading,
     error,
     refresh,
+    hasModule,
   } = useOrganization();
+
+  /* =====================================================
+   MÓDULOS AUTORIZADOS
+   ===================================================== */
+
+  const visibleItems =
+    loading || error
+      ? []
+      : items.filter((item) =>
+        hasModule(item.capability)
+      );
 
   const mainRef = useRef<HTMLElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -372,7 +401,7 @@ export default function AppLayout() {
           className="sidebar-nav"
           aria-label="Navegación principal"
         >
-          {items.map((item) => (
+          {visibleItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}

@@ -2562,3 +2562,111 @@ h1 {
     animation: none;
   }
 }
+
+/* =====================================================
+   ACCESO DENEGADO
+   ===================================================== */
+
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 460px;
+  padding: 40px 24px;
+  background: #ffffff;
+  border: 1px solid #dce6ee;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.access-denied-icon {
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  border-radius: 24px;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 38px;
+}
+
+.access-denied-code {
+  margin-bottom: 8px;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.access-denied h1 {
+  margin: 0 0 12px;
+  color: #16324f;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.access-denied p {
+  max-width: 480px;
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.access-denied-organization {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  max-width: 320px;
+  margin: 24px 0;
+  padding: 16px;
+  border: 1px solid #dce6ee;
+  border-radius: 12px;
+  background: #f4f7fa;
+  overflow-wrap: anywhere;
+}
+
+.access-denied-organization span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.access-denied-organization strong {
+  color: #16324f;
+  font-size: 15px;
+}
+
+.access-denied-organization small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.access-denied .access-denied-help {
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+
+.access-denied .primary-button {
+  min-height: 42px;
+}
+
+@media (max-width: 560px) {
+  .access-denied {
+    min-height: 400px;
+    padding: 28px 16px;
+  }
+
+  .access-denied h1 {
+    font-size: 24px;
+  }
+
+  .access-denied-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 30px;
+  }
+}

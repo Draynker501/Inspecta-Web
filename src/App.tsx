@@ -30,6 +30,7 @@ import Normativa from "./pages/Normativa";
 import Reportes from "./pages/Reportes";
 import Administracion from "./pages/Administracion";
 import SeleccionOrganizacion from "./pages/SeleccionOrganizacion";
+import RequireCapability from "./components/RequireCapability";
 
 import {
   OrganizationProvider,
@@ -150,10 +151,14 @@ export default function App() {
       <ApiAccessHandler />
 
       <Routes>
+        {/* RUTAS PÚBLICAS */}
+
         <Route
           path="/login"
           element={<Login />}
         />
+
+        {/* SELECCIÓN DE ORGANIZACIÓN */}
 
         <Route
           path="/seleccionar-organizacion"
@@ -164,6 +169,8 @@ export default function App() {
           }
         />
 
+        {/* RUTAS PROTEGIDAS */}
+
         <Route
           element={
             <RequireOrganization>
@@ -173,46 +180,96 @@ export default function App() {
             </RequireOrganization>
           }
         >
+          {/* DASHBOARD */}
+
           <Route
             path="/dashboard"
-            element={<Dashboard />}
+            element={
+              <RequireCapability capability="dashboard">
+                <Dashboard />
+              </RequireCapability>
+            }
           />
+
+          {/* INSPECCIONES */}
 
           <Route
             path="/inspecciones"
-            element={<Inspecciones />}
+            element={
+              <RequireCapability capability="inspections">
+                <Inspecciones />
+              </RequireCapability>
+            }
           />
+
+          {/* INCIDENCIAS */}
 
           <Route
             path="/incidencias"
-            element={<Incidencias />}
+            element={
+              <RequireCapability capability="incidents">
+                <Incidencias />
+              </RequireCapability>
+            }
           />
+
+          {/* ACCIONES CORRECTIVAS */}
 
           <Route
             path="/acciones-correctivas"
-            element={<AccionesCorrectivas />}
+            element={
+              <RequireCapability capability="corrective_actions">
+                <AccionesCorrectivas />
+              </RequireCapability>
+            }
           />
+
+          {/* CHECKLISTS */}
 
           <Route
             path="/checklists"
-            element={<Checklists />}
+            element={
+              <RequireCapability capability="checklists">
+                <Checklists />
+              </RequireCapability>
+            }
           />
+
+          {/* NORMATIVA */}
 
           <Route
             path="/normativa"
-            element={<Normativa />}
+            element={
+              <RequireCapability capability="norms">
+                <Normativa />
+              </RequireCapability>
+            }
           />
+
+          {/* REPORTES */}
 
           <Route
             path="/reportes"
-            element={<Reportes />}
+            element={
+              <RequireCapability capability="reports">
+                <Reportes />
+              </RequireCapability>
+            }
           />
+
+          {/* ADMINISTRACIÓN */}
 
           <Route
             path="/administracion"
-            element={<Administracion />}
+            element={
+              <RequireCapability capability="administration">
+                <Administracion />
+              </RequireCapability>
+            }
           />
         </Route>
+
+        {/* REDIRECCIONES */}
 
         <Route
           path="/"
