@@ -73,3 +73,27 @@ export function recordCorrectiveActionUpdate(id: string, status: Exclude<Correct
         }
     );
 }
+
+export async function getCorrectiveActionsByIncident(
+    incidentId: string
+): Promise<CorrectiveAction[]> {
+    const first = await getCorrectiveActions({
+        incidentId,
+        page: 1,
+        perPage: 100,
+    });
+
+    const actions = [...first.data];
+
+    for (let page = 2; page <= first.meta.last_page; page++) {
+        const next = await getCorrectiveActions({
+            incidentId,
+            page,
+            perPage: 100,
+        });
+
+        actions.push(...next.data);
+    }
+
+    return actions;
+}

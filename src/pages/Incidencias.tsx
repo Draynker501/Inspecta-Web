@@ -19,6 +19,8 @@ import { getIncidents, getIncident, type Incident, type IncidentStatus, type Inc
 import type { ApiResponse, InspectionChecklist } from "../types/inspections";
 import { getInspectionChecklist } from "../services/inspections.service";
 
+import IncidentCorrectiveActions from "../components/IncidentCorrectiveActions";
+
 type IncidenciaVista = Incident & { areaNombre: string; reporter_name?: string | null };
 type InspeccionReferencia = { nombre: string; version: string };
 const estados: Record<IncidentStatus, string> = {
@@ -40,6 +42,14 @@ const coloresRiesgo: Record<IncidentRiskLevel, string> = {
 };
 const siguientes: Partial<Record<IncidentStatus, IncidentStatus>> = {
   open: "in_progress", in_progress: "resolved", resolved: "closed",
+};
+const botonesEstado: Partial<Record<IncidentStatus, string>> = {
+  open: "Iniciar seguimiento", in_progress: "Marcar como resuelta", resolved: "Cerrar incidencia",
+};
+const mensajesEstado: Partial<Record<IncidentStatus, string>> = {
+  open: "¿Deseas iniciar el seguimiento de esta incidencia?",
+  in_progress: "¿Deseas marcar esta incidencia como resuelta?",
+  resolved: "¿Deseas cerrar definitivamente esta incidencia?",
 };
 const traducirTipo = (tipo: Incident["type"]): string => tipo ? (tipos[tipo] ?? tipo) : "No especificado";
 const fecha = (valor?: string | null): string => valor && !Number.isNaN(new Date(valor).getTime())
@@ -71,6 +81,7 @@ export default function Incidencias() {
   const [seleccionada, setSeleccionada] = useState<IncidenciaVista | null>(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [errorDetalle, setErrorDetalle] = useState("");
+  const [mensajeExito, setMensajeExito] = useState("");
   const [actualizando, setActualizando] = useState(false);
   const [generandoPDF, setGenerandoPDF] = useState(false);
   const [confirmarCambio, setConfirmarCambio] = useState(false);
@@ -119,6 +130,7 @@ export default function Incidencias() {
 
   const abrirDetalle = async (item: IncidenciaVista) => {
     setSeleccionada(item); setCargandoDetalle(true); setErrorDetalle("");
+    setMensajeExito(""); setConfirmarCambio(false);
     try {
       const respuesta = await getIncident(item.id);
       setSeleccionada((actual) => actual?.id === item.id ? { ...respuesta.data, areaNombre: item.areaNombre } : actual);
@@ -148,22 +160,26 @@ export default function Incidencias() {
   }, [seleccionada?.inspection_id, referenciasInspecciones]);
 
   const cambiarEstado = async () => {
-    if (!seleccionada) return;
+    if (!seleccionada || actualizando || cargandoDetalle) return;
     const nuevo = siguientes[seleccionada.status];
     if (!nuevo) return;
-    setActualizando(true); setErrorDetalle("");
+    setActualizando(true); setErrorDetalle(""); setMensajeExito("");
     try {
       const respuesta = await apiRequest<ApiResponse<Incident>>(
         `/incidents/${encodeURIComponent(seleccionada.id)}/status`,
-        { method: "PATCH", body: JSON.stringify({ status: nuevo }) },
+        { method: "PATCH", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ status: nuevo }) },
       );
-      const actualizado = { ...respuesta.data, areaNombre: seleccionada.areaNombre };
+      const actualizado = { ...seleccionada, ...respuesta.data, areaNombre: seleccionada.areaNombre };
       setSeleccionada(actualizado);
       setIncidencias((anteriores) => anteriores.map((i) => i.id === actualizado.id ? actualizado : i));
       setConfirmarCambio(false);
+      setMensajeExito(`La incidencia se actualizó correctamente a ${estados[actualizado.status]}.`);
     } catch (error) {
-      setErrorDetalle(`No se pudo actualizar el estado. Comprueba tus permisos: ${errorTexto(error)}`);
-      setConfirmarCambio(false);
+      const mensaje = errorTexto(error);
+      setErrorDetalle(/403|forbidden|no tienes permiso|no autorizado/i.test(mensaje)
+        ? "No tienes los permisos necesarios para realizar este cambio de estado."
+        : `No se pudo actualizar la incidencia: ${mensaje}`);
+      console.error("Error al actualizar incidencia:", error);
     } finally { setActualizando(false); }
   };
 
@@ -335,7 +351,8 @@ export default function Incidencias() {
         </DialogTitle>
         <DialogContent dividers><Stack spacing={2.5}>
           {cargandoDetalle && <Alert severity="info">Consultando detalle actualizado...</Alert>}
-          {errorDetalle && <Alert severity="warning">{errorDetalle}</Alert>}
+          {errorDetalle && !confirmarCambio && <Alert severity="error">{errorDetalle}</Alert>}
+          {mensajeExito && <Alert severity="success" onClose={() => setMensajeExito("")}>{mensajeExito}</Alert>}
           <Typography sx={{ color: "#16324F", fontWeight: 700 }}>Información general</Typography>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" }, gap: 1.5 }}>
             {([
@@ -369,32 +386,43 @@ export default function Incidencias() {
           {seleccionada.question_id && <Typography sx={{ color: "#526477", fontSize: 13, overflowWrap: "anywhere" }}>
             Pregunta relacionada: {seleccionada.question_id}</Typography>}
           <Divider />
-          <Typography sx={{ color: "#16324F", fontWeight: 700 }}>Seguimiento</Typography>
-          <Typography sx={{ color: "#526477", fontSize: 13 }}>
-            La investigación, las acciones correctivas y las evidencias se administran en sus módulos correspondientes.
-            Esta vista muestra los datos que registra la API de incidencias.
-          </Typography>
+          <IncidentCorrectiveActions key={seleccionada.id} incidentId={seleccionada.id} />
         </Stack></DialogContent>
         <DialogActions sx={{ p: 2, flexWrap: "wrap", gap: 1 }}>
+          {seleccionada.status === "closed" && <Typography sx={{ mr: "auto", fontSize: 13, color: "text.secondary" }}>Esta incidencia se encuentra cerrada.</Typography>}
           {siguientes[seleccionada.status] && <Button variant="outlined" color="primary"
-            disabled={actualizando || cargandoDetalle} onClick={() => setConfirmarCambio(true)}>
-            Cambiar a {estados[siguientes[seleccionada.status]!]}
+            disabled={actualizando || cargandoDetalle} onClick={() => { setErrorDetalle(""); setMensajeExito(""); setConfirmarCambio(true); }}>
+            {botonesEstado[seleccionada.status]}
           </Button>}
           <Button variant="contained" onClick={() => setSeleccionada(null)} disabled={actualizando}>Cerrar detalle</Button>
         </DialogActions>
       </>}
     </Dialog>
-    <Dialog open={confirmarCambio} onClose={() => { if (!actualizando) setConfirmarCambio(false); }}>
+    <Dialog open={confirmarCambio && Boolean(seleccionada)} fullWidth maxWidth="xs"
+      onClose={() => { if (!actualizando) { setConfirmarCambio(false); setErrorDetalle(""); } }}>
       <DialogTitle>Confirmar cambio de estado</DialogTitle>
-      <DialogContent><Typography>
-        {seleccionada && siguientes[seleccionada.status]
-          ? `¿Cambiar la incidencia a «${estados[siguientes[seleccionada.status]!]}»? Esta transición no se puede revertir desde el módulo.`
-          : "No hay una transición disponible."}
-      </Typography></DialogContent>
-      <DialogActions><Button disabled={actualizando} onClick={() => setConfirmarCambio(false)}>Cancelar</Button>
-        <Button variant="contained" disabled={actualizando} onClick={() => void cambiarEstado()}>
-          {actualizando ? "Guardando..." : "Confirmar"}
-        </Button></DialogActions>
+      <DialogContent>
+        <Typography>{seleccionada ? mensajesEstado[seleccionada.status] : "No hay una transición disponible."}</Typography>
+        <Typography sx={{ mt: 1, fontSize: 13, color: "text.secondary" }}>
+          El cambio quedará registrado en el sistema y no podrá revertirse desde este módulo.
+        </Typography>
+        {seleccionada?.status === "in_progress" && <Alert severity="info" sx={{ mt: 2 }}>
+          Comprueba que las medidas correctivas hayan sido atendidas antes de marcar la incidencia como resuelta.
+        </Alert>}
+        {seleccionada?.status === "resolved" && <Alert severity="warning" sx={{ mt: 2 }}>
+          Una vez cerrada la incidencia, no será posible realizar nuevas transiciones de estado.
+        </Alert>}
+        {errorDetalle && <Alert severity="error" sx={{ mt: 2 }}>{errorDetalle}</Alert>}
+      </DialogContent>
+      <DialogActions>
+        <Button disabled={actualizando} onClick={() => { setConfirmarCambio(false); setErrorDetalle(""); }}>
+          {errorDetalle ? "Cerrar" : "Cancelar"}
+        </Button>
+        <Button variant="contained" disabled={actualizando || !seleccionada || !siguientes[seleccionada.status]}
+          onClick={() => void cambiarEstado()} sx={{ bgcolor: "#0F9D8A", "&:hover": { bgcolor: "#0C8878" } }}>
+          {actualizando ? "Guardando..." : "Confirmar cambio"}
+        </Button>
+      </DialogActions>
     </Dialog>
   </Box>;
 }

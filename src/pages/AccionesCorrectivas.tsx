@@ -214,72 +214,72 @@ export default function AccionesCorrectivas() {
       </Box><Divider /></Box>)}
     </Box></Box><Box sx={{ p: 2, color: "text.secondary", fontSize: 12 }}>Mostrando {filtered.length} de {actions.length} acciones · Verificadas: {summary.verified}</Box></Card>
     <Dialog
-      open={confirm}
-      onClose={() => {
-        if (!saving) {
-          setConfirm(false);
-          setDetailError("");
-        }
+  open={confirm}
+  onClose={() => {
+    if (!saving) {
+      setConfirm(false);
+      setDetailError("");
+    }
+  }}
+  maxWidth="xs"
+  fullWidth
+>
+  <DialogTitle>
+    Confirmar cambio de estado
+  </DialogTitle>
+
+  <DialogContent>
+    <Typography>
+      ¿Deseas cambiar esta acción a{" "}
+      {next ? STATUS[next] : "el siguiente estado"}?
+    </Typography>
+
+    <Typography
+      sx={{
+        mt: 1,
+        color: "text.secondary",
+        fontSize: 13
       }}
-      maxWidth="xs"
-      fullWidth
     >
-      <DialogTitle>
-        Confirmar cambio de estado
-      </DialogTitle>
+      El avance quedará registrado en el historial de la acción.
+    </Typography>
 
-      <DialogContent>
-        <Typography>
-          ¿Deseas cambiar esta acción a{" "}
-          {next ? STATUS[next] : "el siguiente estado"}?
-        </Typography>
+    {next === "verified" && (
+      <Alert severity="info" sx={{ mt: 2 }}>
+        La verificación debe realizarla un usuario autorizado
+        e independiente del responsable y de quien completó
+        la acción.
+      </Alert>
+    )}
 
-        <Typography
-          sx={{
-            mt: 1,
-            color: "text.secondary",
-            fontSize: 13
-          }}
-        >
-          El avance quedará registrado en el historial de la acción.
-        </Typography>
+    {detailError && (
+      <Alert severity="error" sx={{ mt: 2 }}>
+        {detailError}
+      </Alert>
+    )}
+  </DialogContent>
 
-        {next === "verified" && (
-          <Alert severity="info" sx={{ mt: 2 }}>
-            La verificación debe realizarla un usuario autorizado
-            e independiente del responsable y de quien completó
-            la acción.
-          </Alert>
-        )}
+  <DialogActions>
+    <Button
+      disabled={saving}
+      onClick={() => {
+        setConfirm(false);
+        setDetailError("");
+      }}
+    >
+      {detailError ? "Cerrar" : "Cancelar"}
+    </Button>
 
-        {detailError && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {detailError}
-          </Alert>
-        )}
-      </DialogContent>
-
-      <DialogActions>
-        <Button
-          disabled={saving}
-          onClick={() => {
-            setConfirm(false);
-            setDetailError("");
-          }}
-        >
-          {detailError ? "Cerrar" : "Cancelar"}
-        </Button>
-
-        <Button
-          variant="contained"
-          disabled={saving}
-          onClick={() => void changeStatus()}
-          sx={{ bgcolor: GREEN }}
-        >
-          {saving ? "Guardando..." : "Confirmar cambio"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <Button
+      variant="contained"
+      disabled={saving}
+      onClick={() => void changeStatus()}
+      sx={{ bgcolor: GREEN }}
+    >
+      {saving ? "Guardando..." : "Confirmar cambio"}
+    </Button>
+  </DialogActions>
+</Dialog>
     <Dialog open={Boolean(selectedId)} onClose={() => { if (!saving) setSelectedId(null); }} fullWidth maxWidth="md" slotProps={{ paper: { sx: { borderRadius: 3 } } }}>
       <DialogTitle sx={{ borderBottom: "1px solid #E1E8EF" }}><Typography sx={{ fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: 1 }}>DETALLE DE ACCIÓN CORRECTIVA</Typography><Typography variant="h6" sx={{ fontWeight: 700, color: NAVY, overflowWrap: "anywhere" }}>{selectedId}</Typography>{detail && <Chip size="small" label={STATUS[detail.status]} color={statusColor(detail.status)} sx={{ mt: 1 }} />}</DialogTitle>
       <DialogContent dividers>{detailLoading ? <Box sx={{ p: 5, textAlign: "center" }}><CircularProgress /></Box> : detail ? <Box sx={{ py: 1 }}>
@@ -292,7 +292,7 @@ export default function AccionesCorrectivas() {
         <Divider sx={{ my: 3 }} /><Typography sx={{ fontWeight: 700, color: NAVY, mb: 1 }}>Descripción de la acción</Typography><Typography sx={{ whiteSpace: "pre-wrap" }}>{detail.description}</Typography>
         <Typography sx={{ fontWeight: 700, color: NAVY, mt: 2, mb: 1 }}>Observaciones</Typography><Typography sx={{ whiteSpace: "pre-wrap" }}>{detail.observations || "Sin observaciones registradas."}</Typography>
         <Divider sx={{ my: 3 }} /><Typography sx={{ fontWeight: 700, color: NAVY, mb: 2 }}>Historial de seguimiento ({detail.updates?.length ?? 0})</Typography>
-        {!detail.updates?.length ? <Typography color="text.secondary">Todavía no hay avances registrados.</Typography> : detail.updates.map(u => <Box key={u.id} sx={{ border: "1px solid #E1E8EF", borderRadius: 2, p: 2, mb: 1.5 }}><Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}><Chip size="small" label={STATUS[u.status]} color={statusColor(u.status)} /><Typography sx={{ fontSize: 12, color: "text.secondary" }}>{dateText(u.created_at)}</Typography></Box><Typography sx={{ mt: 1, fontSize: 13 }}>{u.comment || "Sin comentario."}</Typography><Typography sx={{ fontSize: 11, color: "text.secondary", mt: 1 }}>Registrado por: {u.user_id}</Typography></Box>)}
+        {!detail.updates?.length ? <Typography color="text.secondary">Todavía no hay avances registrados.</Typography> : detail.updates.map(u => <Box key={u.id} sx={{ border: "1px solid #E1E8EF", borderRadius: 2, p: 2, mb: 1.5 }}><Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 1 }}><Chip size="small" label={STATUS[u.status]} color={statusColor(u.status)} /><Typography sx={{ fontSize: 12, color: "text.secondary" }}>{dateText(u.created_at)}</Typography></Box><Typography sx={{ mt: 1, fontSize: 13 }}>{u.comment || "Sin comentario."}</Typography><Typography sx={{ fontSize: 11, color: "text.secondary", mt: 1 }}>Registrado por: {u.user_name || "Nombre no disponible"}</Typography></Box>)}
         {next && <Box sx={{ mt: 3, p: 2, bgcolor: "#F5F8FB", borderRadius: 2 }}><Typography sx={{ fontWeight: 700, color: NAVY, mb: 1 }}>Registrar avance</Typography><Typography sx={{ fontSize: 13, color: "text.secondary", mb: 2 }}>Siguiente estado: {STATUS[next]}. La API comprobará tus permisos y, para verificar, que seas independiente de quien completó la acción.</Typography><TextField label="Comentario del avance (opcional)" multiline minRows={2} fullWidth value={comment} onChange={e => setComment(e.target.value)} /><Button sx={{ mt: 2, bgcolor: GREEN, textTransform: "none" }} variant="contained" onClick={() => setConfirm(true)} disabled={saving}>Cambiar a {STATUS[next]}</Button></Box>}
       </Box> : <Alert severity="error">{detailError || "No se pudo cargar el detalle."}</Alert>}</DialogContent>
       <DialogActions sx={{ p: 2 }}><Button variant="contained" sx={{ bgcolor: NAVY }} onClick={() => setSelectedId(null)} disabled={saving}>Cerrar detalle</Button></DialogActions>
