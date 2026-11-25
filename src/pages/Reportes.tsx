@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 import {
@@ -28,6 +28,10 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DownloadIcon from "@mui/icons-material/Download";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import RefreshIcon from "@mui/icons-material/Refresh";
+
+import { useOrganization } from "../contexts/OrganizationContext";
+import { API_ACCESS_EVENT, getAuthToken, getOrganizationId } from "../api/client";
+import type { ReportExportMetadata } from "../utils/reportExport";
 
 import { getReportSummary } from "../services/reports.service";
 import { getLocationAreas } from "../services/locations.service";
@@ -370,6 +374,12 @@ export default function Reportes() {
     "inspecta_organization_id"
   );
 
+  const { organization, capabilities, loading: organizationLoading } = useOrganization();
+  const [exporting, setExporting] = useState<"pdf" | "excel" | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const exportLock = useRef(false);
+  const exportContext = useRef<object | null>(null);
+
   const [periodo, setPeriodo] =
     useState<Periodo>("Este mes");
 
@@ -641,6 +651,65 @@ export default function Reportes() {
     inspections || incidents || actions
   );
 
+  const canExport = Boolean(
+    currentReport && hasVisibleSections && validPeriod && !loading && !error &&
+    !organizationLoading && organization && organization.id === organizationId &&
+    capabilities && capabilities.organization_id === organizationId && capabilities.modules.reports &&
+    (!inspections || capabilities.modules.inspections) &&
+    (!incidents || capabilities.modules.incidents) &&
+    (!actions || capabilities.modules.corrective_actions) &&
+    (!area || selectedArea)
+  );
+
+  // Invalidar cualquier exportación iniciada con otro contexto.
+  useLayoutEffect(() => {
+    exportContext.current = canExport ? {} : null;
+    setExportError(null);
+    const invalidate = () => { exportContext.current = null; };
+    window.addEventListener(API_ACCESS_EVENT, invalidate);
+    return () => {
+      invalidate();
+      window.removeEventListener(API_ACCESS_EVENT, invalidate);
+    };
+  }, [canExport, currentReport, organization, capabilities, area, fechas.date_from, fechas.date_to, reloadKey]);
+
+  async function handleExport(format: "pdf" | "excel") {
+    const context = exportContext.current;
+    const token = getAuthToken();
+    if (!canExport || !currentReport || !organization || !context || !token ||
+        getOrganizationId() !== organization.id || exportLock.current) return;
+
+    const canDownload = () => exportContext.current === context &&
+      getAuthToken() === token && getOrganizationId() === organization.id;
+
+    const metadata: ReportExportMetadata = {
+      organizationName: organization.name,
+      areaName: selectedArea ? `${selectedArea.name} — ${selectedArea.plant_name}` : "Todas las áreas",
+      dateFrom: currentReport.period.date_from,
+      dateTo: currentReport.period.date_to,
+      scope: currentReport.scope,
+      generatedAt: new Date(),
+    };
+
+    exportLock.current = true;
+    setExporting(format);
+    setExportError(null);
+    try {
+      if (format === "pdf") {
+        const { exportReportPdf } = await import("../utils/reportPdf");
+        if (canDownload()) await exportReportPdf(currentReport, metadata, canDownload);
+      } else {
+        const { exportReportExcel } = await import("../utils/reportExcel");
+        if (canDownload()) await exportReportExcel(currentReport, metadata, canDownload);
+      }
+    } catch (err) {
+      if (canDownload()) setExportError(getErrorMessage(err, "No fue posible generar el archivo."));
+    } finally {
+      exportLock.current = false;
+      setExporting(null);
+    }
+  }
+
   const severidades = incidents
     ? [
       {
@@ -791,21 +860,23 @@ export default function Reportes() {
           <Button
             variant="outlined"
             size="small"
-            startIcon={<PictureAsPdfIcon />}
-            disabled
+            startIcon={exporting === "pdf" ? <CircularProgress size={16} color="inherit" /> : <PictureAsPdfIcon />}
+            onClick={() => void handleExport("pdf")}
+            disabled={!canExport || exporting !== null}
             sx={{
               color: COLORS.primary,
               borderColor: COLORS.border,
             }}
           >
-            Exportar PDF
+            {exporting === "pdf" ? "Generando PDF..." : "Exportar PDF"}
           </Button>
 
           <Button
             variant="contained"
             size="small"
-            startIcon={<DownloadIcon />}
-            disabled
+            startIcon={exporting === "excel" ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
+            onClick={() => void handleExport("excel")}
+            disabled={!canExport || exporting !== null}
             sx={{
               backgroundColor: COLORS.primary,
               "&:hover": {
@@ -813,10 +884,16 @@ export default function Reportes() {
               },
             }}
           >
-            Exportar reporte
+            {exporting === "excel" ? "Generando Excel..." : "Exportar Excel"}
           </Button>
         </Stack>
       </Stack>
+
+      {exportError && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setExportError(null)}>
+          {exportError}
+        </Alert>
+      )}
 
       {/* Filtros compactos */}
       <Card sx={{ mb: 2 }}>
