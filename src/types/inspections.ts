@@ -1,4 +1,3 @@
-
 export type InspectionStatus =
   | "draft"
   | "completed"
@@ -7,13 +6,28 @@ export type InspectionStatus =
 
 export interface InspectionBase {
   id: string;
+  organization_id: string;
   user_id: string;
-  inspector_name?: string | null;
+  inspector_name: string | null;
   supervisor_id: string | null;
+
   checklist_version_id: string;
+  checklist_name: string | null;
+  checklist_version: string | null;
+
   plant_id: string;
+  plant_name: string | null;
+
   area_id: string;
+  area_name: string | null;
+
   production_line_id: string | null;
+  production_line_name: string | null;
+
+  progress: number | null;
+  answered_questions: number;
+  required_questions: number;
+
   observations?: string | null;
   status: InspectionStatus;
   started_at: string | null;
@@ -21,8 +35,8 @@ export interface InspectionBase {
   supervisor_confirmed_at?: string | null;
   rejected_at?: string | null;
   location_description?: string | null;
-  latitude?: number;
-  longitude?: number;
+  latitude?: string | number | null;
+  longitude?: string | number | null;
   created_at?: string | null;
   updated_at?: string | null;
 }

@@ -38,13 +38,12 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import Alert from "@mui/material/Alert";
 
 import {
-  apiRequest,
   isApiConfigured,
   getOrganizationId,
 } from "../api/client";
 import { getInspections, getInspection, getInspectionChecklist, getInspectionAnswers } from "../services/inspections.service";
 import { getAllVisibleIncidents, type Incident } from "../services/incidents.service";
-import type { ApiResponse, InspectionBase, InspectionDetail, InspectionChecklist, InspectionAnswer } from "../types/inspections";
+import type { InspectionBase, InspectionDetail, InspectionChecklist, InspectionAnswer } from "../types/inspections";
 type Estado =
   | "Completada"
   | "En proceso"
@@ -56,6 +55,11 @@ type Inspeccion = {
   id: string;
   area: string;
   tipo: string;
+  planta: string;
+  linea: string;
+  version: string | null;
+  respondidas: number;
+  obligatorias: number;
   responsable: string;
   fecha: string;
   estado: Estado;
@@ -64,7 +68,7 @@ type Inspeccion = {
 
 function convertirInspeccionApi(item: InspectionBase): Inspeccion {
   const estados: Record<InspectionBase["status"], Estado> = {
-    draft: "Pendiente",
+    draft: item.answered_questions > 0 ? "En proceso" : "Pendiente",
     completed: "Completada",
     confirmed: "Confirmada",
     rejected: "Rechazada",
@@ -74,8 +78,13 @@ function convertirInspeccionApi(item: InspectionBase): Inspeccion {
 
   return {
     id: item.id,
-    area: `Área ${item.area_id.slice(0, 8)}`,
-    tipo: "—",
+    area: item.area_name?.trim() || "Área no disponible",
+    tipo: item.checklist_name?.trim() || "Checklist no disponible",
+    planta: item.plant_name?.trim() || "Planta no disponible",
+    linea: item.production_line_name?.trim() || "",
+    version: item.checklist_version,
+    respondidas: item.answered_questions,
+    obligatorias: item.required_questions,
     responsable: item.inspector_name?.trim() || `Usuario ${item.user_id.slice(0, 8)}`,
     fecha: fecha
       ? new Date(fecha).toLocaleDateString("es-MX", {
@@ -85,8 +94,14 @@ function convertirInspeccionApi(item: InspectionBase): Inspeccion {
       })
       : "—",
     estado: estados[item.status],
-    avance: null,
+    avance: item.progress,
   };
+}
+
+function textoAvance(item: Inspeccion): string {
+  return item.avance === null
+    ? "No aplica (sin preguntas obligatorias)"
+    : `${item.respondidas} de ${item.obligatorias} (${item.avance}%)`;
 }
 
 export default function Inspecciones() {
@@ -115,7 +130,6 @@ export default function Inspecciones() {
   const [detalleReal, setDetalleReal] = useState<InspectionDetail | null>(null);
   const [checklistReal, setChecklistReal] = useState<InspectionChecklist | null>(null);
   const [respuestasReales, setRespuestasReales] = useState<InspectionAnswer[]>([]);
-  const [nombreArea, setNombreArea] = useState<string | null>(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [errorDetalle, setErrorDetalle] = useState("");
   const [incidenciasReales, setIncidenciasReales] = useState<Incident[]>([]);
@@ -206,7 +220,6 @@ export default function Inspecciones() {
       setDetalleReal(null);
       setChecklistReal(null);
       setRespuestasReales([]);
-      setNombreArea(null);
       setErrorDetalle("");
       setIncidenciasReales([]);
       setErrorIncidencias("");
@@ -218,7 +231,6 @@ export default function Inspecciones() {
     setDetalleReal(null);
     setChecklistReal(null);
     setRespuestasReales([]);
-    setNombreArea(null);
     setErrorDetalle("");
     setIncidenciasReales([]);
     setErrorIncidencias("");
@@ -250,16 +262,6 @@ export default function Inspecciones() {
         }
 
 
-        // La consulta del área es auxiliar: no debe impedir mostrar el detalle.
-        try {
-          const area = await apiRequest<ApiResponse<{ name: string }>>(
-            `/areas/${encodeURIComponent(inspection.data.area_id)}`,
-            { method: "GET" }
-          );
-          if (activo) setNombreArea(area.data.name);
-        } catch {
-          // Si la política de ubicaciones restringe la lectura, se muestra el ID.
-        }
       } catch (error) {
         if (activo) setErrorDetalle(
           error instanceof Error ? error.message : "No se pudo consultar el detalle."
@@ -288,8 +290,14 @@ export default function Inspecciones() {
           perPage: 100,
         });
 
-        if (!activo) return;
-        setDatosInspecciones(respuesta.data.map(convertirInspeccionApi));
+        const registros = [...respuesta.data];
+        for (let page = 2; page <= respuesta.meta.last_page; page++) {
+          if (!activo || getOrganizationId() !== organizationId) return;
+          const siguiente = await getInspections({ page, perPage: 100 });
+          registros.push(...siguiente.data);
+        }
+        if (!activo || getOrganizationId() !== organizationId) return;
+        setDatosInspecciones(registros.map(convertirInspeccionApi));
       } catch (error) {
         if (!activo) return;
         setErrorApi(
@@ -307,16 +315,19 @@ export default function Inspecciones() {
     return () => {
       activo = false;
     };
-  }, []);
+  }, [organizationId]);
 
   const inspecciones = useMemo(() => {
     return datosInspecciones.filter((inspeccion) => {
-      const texto = busqueda.toLowerCase();
+      const texto = busqueda.trim().toLowerCase();
 
       const coincideBusqueda =
         inspeccion.id.toLowerCase().includes(texto) ||
         inspeccion.area.toLowerCase().includes(texto) ||
-        inspeccion.responsable.toLowerCase().includes(texto);
+        inspeccion.responsable.toLowerCase().includes(texto) ||
+        inspeccion.tipo.toLowerCase().includes(texto) ||
+        inspeccion.planta.toLowerCase().includes(texto) ||
+        inspeccion.linea.toLowerCase().includes(texto);
 
       const coincideEstado =
         estadoFiltro === "Todos" ||
@@ -329,7 +340,7 @@ export default function Inspecciones() {
   const total = datosInspecciones.length;
 
   const completadas = datosInspecciones.filter(
-    (item) => item.estado === "Completada"
+    (item) => item.estado === "Completada" || item.estado === "Confirmada"
   ).length;
 
   const enProceso = datosInspecciones.filter(
@@ -362,19 +373,6 @@ export default function Inspecciones() {
         };
       }));
 
-      // Resolver cada área una sola vez; el fallo de lectura no bloquea el reporte.
-      const areaIds = [...new Set(details.map(({ inspection }) => inspection.area_id))];
-      const areaResults = await Promise.all(areaIds.map(async (areaId) => {
-        try {
-          const response = await apiRequest<ApiResponse<{ name: string }>>(
-            `/areas/${encodeURIComponent(areaId)}`, { method: "GET" }
-          );
-          return [areaId, response.data.name] as const;
-        } catch {
-          return [areaId, `Área ${areaId.slice(0, 8)}`] as const;
-        }
-      }));
-      const areaNames = new Map<string, string>(areaResults);
       const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
       const azul: [number, number, number] = [22, 50, 79];
       const verde: [number, number, number] = [15, 157, 138];
@@ -390,7 +388,7 @@ export default function Inspecciones() {
         head: [["Inspección", "Checklist", "Inspector", "Área", "Estado"]],
         body: details.map(({ item, inspection, checklist }) => [
           item.id, checklist.checklist.name ?? "No disponible",
-          inspection.inspector_name || inspection.user_id, areaNames.get(inspection.area_id) || item.area, item.estado,
+          inspection.inspector_name || inspection.user_id, inspection.area_name || item.area, convertirInspeccionApi(inspection).estado,
         ]),
         theme: "grid", headStyles: { fillColor: azul }, styles: { fontSize: 8, overflow: "linebreak" },
       });
@@ -403,21 +401,16 @@ export default function Inspecciones() {
         pdf.setFontSize(8);
         pdf.text(item.id, 14, 23);
         const answerMap = new Map(answers.map((answer) => [answer.question_id, answer]));
-        const questions = checklist.sections.flatMap((section) => section.questions);
-        const answered = questions.filter((q) => {
-          const a = answerMap.get(q.id);
-          return a?.answer != null && a.answer.trim() !== "";
-        }).length;
         autoTable(pdf, {
           startY: 28, head: [["Campo", "Valor"]],
           body: [
-            ["Área", areaNames.get(inspection.area_id) || item.area],
+            ["Área", inspection.area_name || item.area],
             ["Checklist", checklist.checklist.name ?? "No disponible"],
             ["Versión", checklist.checklist_version.version],
             ["Inspector", inspection.inspector_name || inspection.user_id],
             ["Fecha", item.fecha],
-            ["Estado", item.estado],
-            ["Avance", questions.length ? `${answered} de ${questions.length} (${Math.round(answered / questions.length * 100)}%)` : "Sin preguntas"],
+            ["Estado", convertirInspeccionApi(inspection).estado],
+            ["Avance", textoAvance(convertirInspeccionApi(inspection))],
             ["Observaciones del inspector", inspection.observations || "Sin observaciones"],
             ["Observaciones del supervisor", inspection.supervisor_observations || "Sin observaciones"],
           ],
@@ -447,7 +440,7 @@ export default function Inspecciones() {
           head: [["Título", "Descripción", "Riesgo", "Estado", "Ubicación"]],
           body: incidents.length ? incidents.map((incident) => [
             incident.title, incident.description, incident.risk_level,
-            incident.status, incident.location_description || areaNames.get(inspection.area_id) || item.area,
+            incident.status, incident.location_description || inspection.area_name || item.area,
           ]) : [["Sin incidencias relacionadas visibles", "—", "—", "—", "—"]],
           theme: "grid", headStyles: { fillColor: azul }, styles: { fontSize: 8, overflow: "linebreak" },
         });
@@ -663,7 +656,7 @@ export default function Inspecciones() {
             <TextField
               fullWidth
               size="small"
-              placeholder="Buscar por folio, área o responsable..."
+              placeholder="Buscar por folio, checklist, ubicación o responsable..."
               value={busqueda}
               onChange={(event) => setBusqueda(event.target.value)}
               slotProps={{
@@ -744,7 +737,7 @@ export default function Inspecciones() {
                     color: "#16324F",
                   }}
                 >
-                  Tipo
+                  Checklist
                 </TableCell>
 
                 <TableCell
@@ -823,6 +816,8 @@ export default function Inspecciones() {
                       >
                         {inspeccion.area}
                       </Typography>
+                      <Typography sx={{ fontSize: 12, color: "#81909D" }}>{inspeccion.planta}</Typography>
+                      {inspeccion.linea && <Typography sx={{ fontSize: 12, color: "#81909D" }}>{inspeccion.linea}</Typography>}
                     </TableCell>
 
                     <TableCell>
@@ -834,6 +829,7 @@ export default function Inspecciones() {
                       >
                         {inspeccion.tipo}
                       </Typography>
+                      {inspeccion.version && <Typography sx={{ fontSize: 12, color: "#81909D" }}>Versión {inspeccion.version}</Typography>}
                     </TableCell>
 
                     <TableCell>
@@ -881,10 +877,11 @@ export default function Inspecciones() {
                           }}
                         >
                           {inspeccion.avance === null
-                            ? "Sin datos"
+                            ? "No aplica"
                             : `${inspeccion.avance}%`}
                         </Typography>
 
+                        {inspeccion.avance !== null && <Typography sx={{ fontSize: 11, color: "#81909D" }}>{inspeccion.respondidas} de {inspeccion.obligatorias}</Typography>}
                         <Box
                           sx={{
                             width: "100%",
@@ -967,7 +964,8 @@ export default function Inspecciones() {
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
         {inspeccionSeleccionada && (() => {
-          const estadoDetalle = getEstadoColor(inspeccionSeleccionada.estado);
+          const resumen = detalleReal ? convertirInspeccionApi(detalleReal) : inspeccionSeleccionada;
+          const estadoDetalle = getEstadoColor(resumen.estado);
           const preguntas = checklistReal?.sections.flatMap((seccion) =>
             seccion.questions.map((pregunta) => ({ ...pregunta, seccion: seccion.name }))
           ) ?? [];
@@ -978,20 +976,20 @@ export default function Inspecciones() {
             const respuesta = respuestasPorPregunta.get(pregunta.id);
             return respuesta && respuesta.answer !== null && respuesta.answer.trim() !== "";
           }).length;
-          const avance = preguntas.length
-            ? Math.round((respondidas / preguntas.length) * 100)
-            : null;
           const fecha = detalleReal?.completed_at ?? detalleReal?.started_at;
           const fechaLegible = fecha
             ? new Date(fecha).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" })
             : "No disponible";
           const campos = [
-            ["Área de trabajo", nombreArea ?? detalleReal?.area_id ?? "No disponible"],
-            ["Tipo de inspección", checklistReal?.checklist.name ?? "No disponible"],
+            ["Área de trabajo", resumen.area],
+            ["Planta", resumen.planta],
+            ["Línea de producción", resumen.linea || "No aplica"],
+            ["Checklist", resumen.tipo],
+            ["Versión", resumen.version ?? "No disponible"],
             ["Inspector responsable", detalleReal?.inspector_name?.trim() || detalleReal?.user_id || "No disponible"],
             ["Fecha", fechaLegible],
-            ["Avance", avance === null ? "Sin preguntas disponibles" : `${respondidas} de ${preguntas.length} (${avance}%)`],
-            ["Estado", inspeccionSeleccionada.estado],
+            ["Avance", textoAvance(resumen)],
+            ["Estado", resumen.estado],
           ];
 
           return (
@@ -1009,7 +1007,7 @@ export default function Inspecciones() {
                       {inspeccionSeleccionada.id}
                     </Typography>
                   </Box>
-                  <Chip label={inspeccionSeleccionada.estado} sx={{
+                  <Chip label={resumen.estado} sx={{
                     color: estadoDetalle.color, backgroundColor: estadoDetalle.background, fontWeight: 700
                   }} />
                 </Box>
@@ -1050,7 +1048,7 @@ export default function Inspecciones() {
 
                     <Box>
                       <Typography sx={{ color: "#16324F", fontWeight: 700, mb: 1.5 }}>
-                        Checklist y respuestas ({respondidas}/{preguntas.length})
+                        Checklist y respuestas ({respondidas}/{preguntas.length} respuestas registradas)
                       </Typography>
                       {checklistReal.sections.length === 0 && (
                         <Alert severity="info">Esta versión del checklist no contiene secciones.</Alert>
@@ -1107,7 +1105,7 @@ export default function Inspecciones() {
                                 Estado: {({ open: "Abierta", in_progress: "En proceso", resolved: "Resuelta", closed: "Cerrada" } as Record<string, string>)[incident.status]}
                               </Typography>
                               <Typography sx={{ color: "#526477", fontSize: 13 }}>
-                                Ubicación: {incident.location_description || nombreArea || "No especificada"}
+                                Ubicación: {incident.location_description || resumen.area}
                               </Typography>
                               <Typography sx={{ color: "#526477", fontSize: 13 }}>
                                 Reportada: {incident.reported_at ? new Date(incident.reported_at).toLocaleDateString("es-MX") : "Sin fecha"}
