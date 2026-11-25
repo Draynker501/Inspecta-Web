@@ -2670,3 +2670,392 @@ h1 {
     font-size: 30px;
   }
 }
+
+/* =====================================================
+   INSPECTA - DASHBOARD API INTEGRATION
+   ===================================================== */
+
+/* Selector mensual */
+
+.inspecta-dashboard .dashboard-month-input {
+  font-family: inherit;
+  font-size: 13px;
+  min-width: 180px;
+  min-height: 40px;
+  color: #16324F;
+  cursor: pointer;
+  color-scheme: light;
+}
+
+.inspecta-dashboard .dashboard-month-input:focus {
+  outline: 2px solid rgba(15, 157, 138, .25);
+  border-color: #0F9D8A;
+}
+
+/* Indicadores según permisos */
+
+.inspecta-dashboard .metric-grid {
+  grid-template-columns: repeat(auto-fit,
+      minmax(190px, 1fr));
+}
+
+.inspecta-dashboard .dashboard-main-grid> :only-child,
+.inspecta-dashboard .dashboard-lower-grid> :only-child {
+  grid-column: 1 / -1;
+}
+
+/* Tendencias */
+
+.inspecta-dashboard .trend-neutral {
+  color: #81909D;
+}
+
+.inspecta-dashboard .compliance-number .dashboard-trend-up {
+  color: #16803C;
+}
+
+.inspecta-dashboard .compliance-number .dashboard-trend-down {
+  color: #B42318;
+}
+
+.inspecta-dashboard .compliance-number .dashboard-trend-neutral {
+  color: #81909D;
+}
+
+/* Cuatro niveles de riesgo */
+
+.inspecta-dashboard .severity-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.inspecta-dashboard .severity-dot.high {
+  background: #E67E22;
+}
+
+/* Estados de inspección */
+
+.inspecta-dashboard .status-pill.critical {
+  color: #B42318;
+  background: #FEE4E2;
+}
+
+.inspecta-dashboard .dashboard-row-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #81909D;
+}
+
+.inspecta-dashboard .dashboard-row-button:hover {
+  color: #0F9D8A;
+}
+
+/* Prioridades reales de acciones correctivas */
+
+.inspecta-dashboard .action-row .action-status.priority-low {
+  background: #2673C9;
+}
+
+.inspecta-dashboard .action-row .action-status.priority-medium {
+  background: #F2A900;
+}
+
+.inspecta-dashboard .action-row .action-status.priority-high {
+  background: #E67E22;
+}
+
+.inspecta-dashboard .action-row .action-status.priority-critical {
+  background: #B42318;
+}
+
+.inspecta-dashboard .dashboard-action-info {
+  min-width: 0;
+}
+
+.inspecta-dashboard .dashboard-action-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inspecta-dashboard .dashboard-action-info span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Carga, errores y estados vacíos */
+
+.inspecta-dashboard .dashboard-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px;
+  min-height: 200px;
+  text-align: center;
+}
+
+.inspecta-dashboard .dashboard-state>strong {
+  color: #16324F;
+  font-size: 16px;
+}
+
+.inspecta-dashboard .dashboard-state>span {
+  color: #81909D;
+  font-size: 13px;
+}
+
+.inspecta-dashboard .dashboard-state>ion-icon {
+  font-size: 32px;
+  color: #0F9D8A;
+}
+
+.inspecta-dashboard .dashboard-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px;
+  min-height: 150px;
+  text-align: center;
+  color: #81909D;
+  font-size: 13px;
+}
+
+.inspecta-dashboard .dashboard-empty-state ion-icon {
+  color: #AABBC8;
+  font-size: 28px;
+}
+
+/* Responsive */
+
+@media (max-width: 1250px) {
+  .inspecta-dashboard .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .inspecta-dashboard .severity-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .inspecta-dashboard .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inspecta-dashboard .dashboard-month-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .inspecta-dashboard .dashboard-inspection-status {
+    display: none;
+  }
+
+  .inspecta-dashboard .severity-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inspecta-dashboard .dashboard-state {
+    padding: 20px;
+  }
+}
+
+/* =====================================================
+   DASHBOARD - AGRUPACIÓN TEMPORAL
+   ===================================================== */
+
+.inspecta-dashboard .dashboard-granularity-select {
+  appearance: none;
+  -webkit-appearance: none;
+
+  min-width: 100px;
+  min-height: 34px;
+
+  padding: 7px 30px 7px 12px;
+
+  border: 1px solid #DCE6EE;
+  border-radius: 9px;
+
+  background-color: #F4F7FA;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2381909D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+
+  color: #16324F;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.inspecta-dashboard .dashboard-granularity-select:hover {
+  border-color: #0F9D8A;
+  background-color: #FFFFFF;
+}
+
+.inspecta-dashboard .dashboard-granularity-select:focus-visible {
+  outline: 2px solid #0F9D8A;
+  outline-offset: 2px;
+}
+
+.inspecta-dashboard .dashboard-approval-period {
+  display: block;
+
+  margin-top: 4px;
+  margin-bottom: 8px;
+
+  color: #81909D;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* =====================================================
+   DASHBOARD - TOOLTIP DE APROBACIÓN
+   ===================================================== */
+
+.inspecta-dashboard .dashboard-chart-tooltip {
+  min-width: 170px;
+
+  padding: 12px 14px;
+
+  border: 1px solid #DCE6EE;
+  border-radius: 12px;
+
+  background-color: #FFFFFF;
+
+  box-shadow: 0 6px 20px rgba(22, 50, 79, 0.10);
+
+  color: #64748B;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.inspecta-dashboard .dashboard-chart-tooltip>strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #16324F;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.inspecta-dashboard .dashboard-tooltip-rate {
+  margin-bottom: 6px;
+
+  color: #0F9D8A;
+
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.inspecta-dashboard .dashboard-chart-tooltip b {
+  color: #16324F;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .inspecta-dashboard .dashboard-granularity-select {
+    min-width: 90px;
+    font-size: 11px;
+  }
+}
+
+/* =====================================================
+   DASHBOARD - CARGA INDEPENDIENTE DE GRÁFICAS
+   ===================================================== */
+
+.inspecta-dashboard .dashboard-chart-state {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  width: 100%;
+  min-height: 210px;
+
+  padding: 16px;
+
+  box-sizing: border-box;
+
+  color: #81909D;
+
+  font-size: 12px;
+  text-align: center;
+}
+
+/* =====================================================
+   DASHBOARD - LEYENDA DE SEVERIDAD
+   ===================================================== */
+
+.inspecta-dashboard .severity-summary {
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px 20px;
+}
+
+.inspecta-dashboard .severity-item {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: flex-start;
+
+  flex: 0 0 auto;
+
+  gap: 7px;
+
+  width: auto;
+}
+
+.inspecta-dashboard .severity-item strong {
+  margin: 0 0 0 3px;
+
+  flex: 0 0 auto;
+
+  color: #16324F;
+  font-weight: 700;
+}
+
+.inspecta-dashboard .severity-dot {
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .inspecta-dashboard .severity-summary {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px 16px;
+  }
+}
