@@ -32,8 +32,9 @@ import {
 import type {
   OrganizationCapabilities,
   ModuleCapabilities,
-  CorrectiveActionCapabilities,
   ModuleKey,
+  CorrectiveActionCapabilities,
+  AdministrationCapabilities,
 } from "../services/capabilities.service";
 
 /* =====================================================
@@ -47,6 +48,7 @@ interface OrganizationContextValue {
   roles: string[];
   modules: ModuleCapabilities | null;
   correctiveActions: CorrectiveActionCapabilities | null;
+  administration: AdministrationCapabilities | null;
   loading: boolean;
   error: string | null;
   hasModule: (module: ModuleKey) => boolean;
@@ -250,8 +252,8 @@ export function OrganizationProvider({
     capabilities,
     roles: capabilities?.roles ?? [],
     modules: capabilities?.modules ?? null,
-    correctiveActions:
-      capabilities?.corrective_actions ?? null,
+    correctiveActions: capabilities?.corrective_actions ?? null,
+    administration: capabilities?.administration ?? null,
     loading,
     error,
     hasModule,

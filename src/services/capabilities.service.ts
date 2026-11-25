@@ -19,11 +19,24 @@ export interface CorrectiveActionCapabilities {
   verify: boolean;
 }
 
+export interface AdministrationCapabilities {
+  manage_users: boolean;
+  manage_memberships: boolean;
+  manage_roles: boolean;
+  view_locations: boolean;
+  manage_locations: boolean;
+  view_all_locations: boolean;
+  create_users: boolean;
+  assign_roles: boolean;
+  assign_locations: boolean;
+}
+
 export interface OrganizationCapabilities {
   organization_id: string;
   roles: string[];
   modules: ModuleCapabilities;
   corrective_actions: CorrectiveActionCapabilities;
+  administration: AdministrationCapabilities;
 }
 
 export type ModuleKey = keyof ModuleCapabilities;
