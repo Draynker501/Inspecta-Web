@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import {
   Box,
@@ -36,7 +37,11 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import Alert from "@mui/material/Alert";
 
-import { apiRequest, isApiConfigured } from "../api/client";
+import {
+  apiRequest,
+  isApiConfigured,
+  getOrganizationId,
+} from "../api/client";
 import { getInspections, getInspection, getInspectionChecklist, getInspectionAnswers } from "../services/inspections.service";
 import { getAllVisibleIncidents, type Incident } from "../services/incidents.service";
 import type { ApiResponse, InspectionBase, InspectionDetail, InspectionChecklist, InspectionAnswer } from "../types/inspections";
@@ -85,6 +90,17 @@ function convertirInspeccionApi(item: InspectionBase): Inspeccion {
 }
 
 export default function Inspecciones() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const inspectionId = searchParams.get("inspectionId");
+  const organizationId = getOrganizationId();
+
+  const [cargandoAccesoDirecto, setCargandoAccesoDirecto] =
+    useState(false);
+
+  const [errorAccesoDirecto, setErrorAccesoDirecto] =
+    useState("");
+
   const [busqueda, setBusqueda] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("Todos");
 
@@ -104,6 +120,86 @@ export default function Inspecciones() {
   const [errorDetalle, setErrorDetalle] = useState("");
   const [incidenciasReales, setIncidenciasReales] = useState<Incident[]>([]);
   const [errorIncidencias, setErrorIncidencias] = useState("");
+
+  useEffect(() => {
+    if (!inspectionId) {
+      setCargandoAccesoDirecto(false);
+      setErrorAccesoDirecto("");
+      return;
+    }
+
+    const controller = new AbortController();
+
+    setInspeccionSeleccionada(null);
+    setCargandoAccesoDirecto(true);
+    setErrorAccesoDirecto("");
+
+    async function abrirInspeccionDesdeUrl() {
+      try {
+        const response = await getInspection(
+          inspectionId!,
+          controller.signal
+        );
+
+        if (
+          controller.signal.aborted ||
+          getOrganizationId() !== organizationId
+        ) {
+          return;
+        }
+
+        const inspeccion = convertirInspeccionApi(
+          response.data
+        );
+
+        setInspeccionSeleccionada(inspeccion);
+      } catch (error) {
+        if (
+          controller.signal.aborted ||
+          getOrganizationId() !== organizationId
+        ) {
+          return;
+        }
+
+        setErrorAccesoDirecto(
+          error instanceof Error
+            ? error.message
+            : "No fue posible abrir la inspección seleccionada."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setCargandoAccesoDirecto(false);
+        }
+      }
+    }
+
+    void abrirInspeccionDesdeUrl();
+
+    return () => {
+      controller.abort();
+    };
+  }, [inspectionId, organizationId]);
+
+  function limpiarAccesoDirecto() {
+    setSearchParams(
+      (previous) => {
+        const params = new URLSearchParams(previous);
+
+        params.delete("inspectionId");
+
+        return params;
+      },
+      { replace: true }
+    );
+
+    setErrorAccesoDirecto("");
+    setCargandoAccesoDirecto(false);
+  }
+
+  function cerrarDetalle() {
+    setInspeccionSeleccionada(null);
+    limpiarAccesoDirecto();
+  }
 
   useEffect(() => {
     if (!inspeccionSeleccionada) {
@@ -260,8 +356,10 @@ export default function Inspecciones() {
           const next = await getInspectionAnswers(item.id, page);
           answers.push(...next.data);
         }
-        return { item, inspection: inspection.data, checklist: checklist.data, answers,
-          incidents: allIncidents.filter((incident) => incident.inspection_id === item.id) };
+        return {
+          item, inspection: inspection.data, checklist: checklist.data, answers,
+          incidents: allIncidents.filter((incident) => incident.inspection_id === item.id)
+        };
       }));
 
       // Resolver cada área una sola vez; el fallo de lectura no bloquea el reporte.
@@ -471,6 +569,24 @@ export default function Inspecciones() {
       {errorApi && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {errorApi}
+        </Alert>
+      )}
+
+      {cargandoAccesoDirecto && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Abriendo la inspección seleccionada...
+        </Alert>
+      )}
+
+      {errorAccesoDirecto && (
+        <Alert
+          severity="error"
+          sx={{ mb: 2 }}
+          onClose={limpiarAccesoDirecto}
+        >
+          No fue posible abrir la inspección seleccionada.
+          {" "}
+          {errorAccesoDirecto}
         </Alert>
       )}
 
@@ -800,7 +916,10 @@ export default function Inspecciones() {
                       <Button
                         size="small"
                         startIcon={<VisibilityIcon />}
-                        onClick={() => setInspeccionSeleccionada(inspeccion)}
+                        onClick={() => {
+                          limpiarAccesoDirecto();
+                          setInspeccionSeleccionada(inspeccion);
+                        }}
                         sx={{
                           color: "#16324F",
                           fontWeight: 600,
@@ -842,7 +961,7 @@ export default function Inspecciones() {
       {/* DETALLE DE LA INSPECCIÓN: datos obtenidos desde la API */}
       <Dialog
         open={Boolean(inspeccionSeleccionada)}
-        onClose={() => setInspeccionSeleccionada(null)}
+        onClose={cerrarDetalle}
         fullWidth
         maxWidth="md"
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
@@ -1024,7 +1143,7 @@ export default function Inspecciones() {
               </DialogContent>
               <DialogActions sx={{ p: 2 }}>
                 <Button
-                  onClick={() => setInspeccionSeleccionada(null)}
+                  onClick={cerrarDetalle}
                   variant="contained"
                   sx={{ bgcolor: "#16324F", textTransform: "none", "&:hover": { bgcolor: "#234766" } }}
                 >

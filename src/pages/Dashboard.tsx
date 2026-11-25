@@ -711,8 +711,8 @@ export default function Dashboard() {
                   value={formatNumber(actions.value)}
                   period="Actualmente"
                   detail={`${actions.overdue} ${actions.overdue === 1
-                      ? "vencida"
-                      : "vencidas"
+                    ? "vencida"
+                    : "vencidas"
                     }`}
                   trend="neutral"
                   type="purple"
@@ -1194,7 +1194,9 @@ export default function Dashboard() {
                                   aria-label="Ver detalle de inspección"
                                   title="Ver detalle de inspección"
                                   onClick={() =>
-                                    navigate(`/inspecciones?inspectionId=${inspection.id}`)
+                                    navigate(
+                                      `/inspecciones?inspectionId=${encodeURIComponent(inspection.id)}`
+                                    )
                                   }
                                 >
                                   <IonIcon icon={chevronForwardOutline} />

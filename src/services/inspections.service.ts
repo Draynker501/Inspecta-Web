@@ -46,11 +46,15 @@ export function getInspections(
 }
 
 export function getInspection(
-  id: string
+  id: string,
+  signal?: AbortSignal
 ): Promise<ApiResponse<InspectionDetail>> {
   return apiRequest<ApiResponse<InspectionDetail>>(
     `/inspections/${encodeURIComponent(id)}`,
-    { method: "GET" }
+    {
+      method: "GET",
+      signal,
+    }
   );
 }
 
