@@ -15,6 +15,7 @@ import type {
   PlantUpdateInput,
   AreaUpdateInput,
   ProductionLineUpdateInput,
+  LocationStatusInput,
 } from "../types/locations";
 
 // =====================================================
@@ -229,6 +230,49 @@ export function updateLocationProductionLine(
     LocationResponse<ProductionLineDetails>
   >(
     `/production-lines/${encodeURIComponent(lineId)}`,
+    {
+      method: "PATCH",
+      body: input,
+    }
+  );
+}
+
+// =====================================================
+// ACTIVACIÓN Y DESACTIVACIÓN DE UBICACIONES
+// =====================================================
+
+export function updateLocationPlantStatus(
+  plantId: string,
+  input: LocationStatusInput
+): Promise<LocationResponse<PlantDetails>> {
+  return apiRequest<LocationResponse<PlantDetails>>(
+    `/plants/${encodeURIComponent(plantId)}/status`,
+    {
+      method: "PATCH",
+      body: input,
+    }
+  );
+}
+
+export function updateLocationAreaStatus(
+  areaId: string,
+  input: LocationStatusInput
+): Promise<LocationResponse<AreaDetails>> {
+  return apiRequest<LocationResponse<AreaDetails>>(
+    `/areas/${encodeURIComponent(areaId)}/status`,
+    {
+      method: "PATCH",
+      body: input,
+    }
+  );
+}
+
+export function updateLocationProductionLineStatus(
+  lineId: string,
+  input: LocationStatusInput
+): Promise<LocationResponse<ProductionLineDetails>> {
+  return apiRequest<LocationResponse<ProductionLineDetails>>(
+    `/production-lines/${encodeURIComponent(lineId)}/status`,
     {
       method: "PATCH",
       body: input,

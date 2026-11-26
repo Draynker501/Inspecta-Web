@@ -1,5 +1,4 @@
-
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   Accordion,
@@ -31,12 +30,14 @@ import {
 import { getLocationHierarchy } from "../services/locations.service";
 
 import LocationFormDialog from "./LocationFormDialog";
+import LocationStatusDialog from "./LocationStatusDialog";
 
 import type {
   LocationPlant,
   LocationArea,
   LocationProductionLine,
   LocationFormConfig,
+  LocationStatusConfig,
 } from "../types/locations";
 
 const PER_PAGE = 10;
@@ -90,11 +91,15 @@ function LocationStatus({
 interface ProductionLineItemProps {
   line: LocationProductionLine;
   onOpenForm: (config: LocationFormConfig) => void;
+  onOpenStatus: (config: LocationStatusConfig) => void;
+  disabled: boolean;
 }
 
 function ProductionLineItem({
   line,
   onOpenForm,
+  onOpenStatus,
+  disabled,
 }: ProductionLineItemProps) {
   return (
     <Box
@@ -145,6 +150,7 @@ function ProductionLineItem({
           size="small"
           variant="outlined"
           startIcon={<Edit />}
+              disabled={disabled}
           onClick={() =>
             onOpenForm({
               mode: "edit",
@@ -154,6 +160,23 @@ function ProductionLineItem({
           }
         >
           Editar
+        </Button>
+
+        <Button
+          size="small"
+          variant="outlined"
+          color={line.status ? "error" : "success"}
+              disabled={disabled}
+          onClick={() =>
+            onOpenStatus({
+              kind: "production-line",
+              id: line.id,
+              name: line.name,
+              status: line.status,
+            })
+          }
+        >
+          {line.status ? "Desactivar" : "Reactivar"}
         </Button>
       </Stack>
     </Box>
@@ -167,11 +190,15 @@ function ProductionLineItem({
 interface AreaItemProps {
   area: LocationArea;
   onOpenForm: (config: LocationFormConfig) => void;
+  onOpenStatus: (config: LocationStatusConfig) => void;
+  disabled: boolean;
 }
 
 function AreaItem({
   area,
   onOpenForm,
+  onOpenStatus,
+  disabled,
 }: AreaItemProps) {
   return (
     <Accordion
@@ -249,6 +276,7 @@ function AreaItem({
               size="small"
               variant="outlined"
               startIcon={<Edit />}
+              disabled={disabled}
               onClick={() =>
                 onOpenForm({
                   mode: "edit",
@@ -262,9 +290,26 @@ function AreaItem({
 
             <Button
               size="small"
+              variant="outlined"
+              color={area.status ? "error" : "success"}
+              disabled={disabled}
+              onClick={() =>
+                onOpenStatus({
+                  kind: "area",
+                  id: area.id,
+                  name: area.name,
+                  status: area.status,
+                })
+              }
+            >
+              {area.status ? "Desactivar" : "Reactivar"}
+            </Button>
+
+            <Button
+              size="small"
               variant="contained"
               startIcon={<Add />}
-              disabled={!area.available}
+              disabled={disabled || !area.available}
               onClick={() =>
                 onOpenForm({
                   mode: "create",
@@ -308,6 +353,8 @@ function AreaItem({
                 key={line.id}
                 line={line}
                 onOpenForm={onOpenForm}
+                onOpenStatus={onOpenStatus}
+                disabled={disabled}
               />
             ))
           )}
@@ -324,11 +371,15 @@ function AreaItem({
 interface PlantItemProps {
   plant: LocationPlant;
   onOpenForm: (config: LocationFormConfig) => void;
+  onOpenStatus: (config: LocationStatusConfig) => void;
+  disabled: boolean;
 }
 
 function PlantItem({
   plant,
   onOpenForm,
+  onOpenStatus,
+  disabled,
 }: PlantItemProps) {
   return (
     <Accordion
@@ -418,6 +469,7 @@ function PlantItem({
               size="small"
               variant="outlined"
               startIcon={<Edit />}
+              disabled={disabled}
               onClick={() =>
                 onOpenForm({
                   mode: "edit",
@@ -431,9 +483,26 @@ function PlantItem({
 
             <Button
               size="small"
+              variant="outlined"
+              color={plant.status ? "error" : "success"}
+              disabled={disabled}
+              onClick={() =>
+                onOpenStatus({
+                  kind: "plant",
+                  id: plant.id,
+                  name: plant.name,
+                  status: plant.status,
+                })
+              }
+            >
+              {plant.status ? "Desactivar" : "Reactivar"}
+            </Button>
+
+            <Button
+              size="small"
               variant="contained"
               startIcon={<Add />}
-              disabled={!plant.available}
+              disabled={disabled || !plant.available}
               onClick={() =>
                 onOpenForm({
                   mode: "create",
@@ -477,6 +546,8 @@ function PlantItem({
                 key={area.id}
                 area={area}
                 onOpenForm={onOpenForm}
+                onOpenStatus={onOpenStatus}
+                disabled={disabled}
               />
             ))
           )}
@@ -510,26 +581,36 @@ export default function LocationAdministration() {
   const [formConfig, setFormConfig] =
     useState<LocationFormConfig | null>(null);
 
+  const [statusConfig, setStatusConfig] =
+    useState<LocationStatusConfig | null>(null);
+
   const [successMessage, setSuccessMessage] =
     useState<string | null>(null);
 
   const [refreshVersion, setRefreshVersion] =
     useState(0);
 
-  // ===================================================
-  // ACTUALIZAR UBICACIONES
-  // ===================================================
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const loadedPage = useRef<number | null>(null);
+  const requestPending = useRef(false);
 
   const refresh = useCallback(() => {
+    if (requestPending.current) return;
+    requestPending.current = true;
+    setRefreshing(true);
     setRefreshVersion((current) => current + 1);
   }, []);
 
-  // ===================================================
-  // FORMULARIO
-  // ===================================================
-
   function handleFormSaved(message: string) {
     setFormConfig(null);
+    setSuccessMessage(message);
+    refresh();
+  }
+
+  function handleStatusSaved(message: string) {
+    setStatusConfig(null);
     setSuccessMessage(message);
     refresh();
   }
@@ -538,36 +619,26 @@ export default function LocationAdministration() {
     setFormConfig(null);
   }
 
-  // ===================================================
-  // CONSULTAR JERARQUÍA
-  // ===================================================
-
+  // Una sola consulta activa: las actualizaciones de la misma
+  // página conservan el listado y los acordeones montados.
   useEffect(() => {
     const controller = new AbortController();
+    const silent = loadedPage.current === page;
+    requestPending.current = true;
+    setLoading(!silent);
+    setRefreshing(silent);
+    setError(null);
+    setRefreshError(null);
 
     async function loadLocations() {
-      setLoading(true);
-      setError(null);
-
       try {
         const response = await getLocationHierarchy(
-          {
-            page,
-            perPage: PER_PAGE,
-          },
+          { page, perPage: PER_PAGE },
           controller.signal
         );
+        if (controller.signal.aborted) return;
 
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        const nextLastPage = Math.max(
-          1,
-          response.meta.last_page
-        );
-
-        // Corregir la página si deja de existir.
+        const nextLastPage = Math.max(1, response.meta.last_page);
         if (page > nextLastPage) {
           setPage(nextLastPage);
           return;
@@ -576,30 +647,32 @@ export default function LocationAdministration() {
         setPlants(response.data);
         setLastPage(nextLastPage);
         setTotal(response.meta.total);
+        loadedPage.current = page;
+        setHasLoaded(true);
       } catch (err) {
-        if (controller.signal.aborted) {
-          return;
+        if (controller.signal.aborted) return;
+        const message = err instanceof Error
+          ? err.message
+          : "No fue posible consultar las ubicaciones.";
+        if (silent) {
+          setRefreshError(`No fue posible actualizar el listado. Los datos mostrados podrían estar desactualizados: ${message}`);
+        } else {
+          setError(message);
         }
-
-        setPlants([]);
-        setTotal(0);
-
-        setError(
-          err instanceof Error
-            ? err.message
-            : "No fue posible consultar las ubicaciones."
-        );
       } finally {
         if (!controller.signal.aborted) {
+          requestPending.current = false;
           setLoading(false);
+          setRefreshing(false);
         }
       }
     }
 
     void loadLocations();
-
     return () => controller.abort();
   }, [page, refreshVersion]);
+
+  const actionsDisabled = loading || refreshing || Boolean(refreshError) || Boolean(error);
 
   // ===================================================
   // INTERFAZ
@@ -651,9 +724,9 @@ export default function LocationAdministration() {
         >
           <Button
             variant="outlined"
-            startIcon={<Refresh />}
+            startIcon={refreshing ? <CircularProgress size={18} color="inherit" /> : <Refresh />}
             onClick={refresh}
-            disabled={loading}
+            disabled={loading || refreshing}
           >
             Actualizar
           </Button>
@@ -661,7 +734,7 @@ export default function LocationAdministration() {
           <Button
             variant="contained"
             startIcon={<Add />}
-            disabled={loading}
+            disabled={actionsDisabled}
             onClick={() =>
               setFormConfig({
                 mode: "create",
@@ -749,6 +822,16 @@ export default function LocationAdministration() {
         </Alert>
       )}
 
+      {refreshError && (
+        <Alert severity="warning" action={
+          <Button color="inherit" size="small" disabled={refreshing} onClick={refresh}>
+            Reintentar
+          </Button>
+        }>
+          {refreshError}
+        </Alert>
+      )}
+
       {/* ESTADO DE CARGA */}
 
       {loading ? (
@@ -768,7 +851,7 @@ export default function LocationAdministration() {
             Cargando ubicaciones...
           </Typography>
         </Stack>
-      ) : !error ? (
+      ) : !error && hasLoaded ? (
         <>
           {/* TOTAL DE REGISTROS */}
 
@@ -793,6 +876,8 @@ export default function LocationAdministration() {
                   key={plant.id}
                   plant={plant}
                   onOpenForm={setFormConfig}
+                  onOpenStatus={setStatusConfig}
+                  disabled={actionsDisabled}
                 />
               ))}
             </Stack>
@@ -809,6 +894,7 @@ export default function LocationAdministration() {
               >
                 <Pagination
                   count={lastPage}
+                  disabled={loading || refreshing}
                   page={page}
                   onChange={(_, value) =>
                     setPage(value)
@@ -829,6 +915,17 @@ export default function LocationAdministration() {
         onClose={handleFormClose}
         onSaved={handleFormSaved}
       />
+
+      {/* CONFIRMACIÓN DE CAMBIO DE ESTADO */}
+
+      {statusConfig && (
+        <LocationStatusDialog
+          key={`${statusConfig.kind}-${statusConfig.id}`}
+          config={statusConfig}
+          onClose={() => setStatusConfig(null)}
+          onSaved={handleStatusSaved}
+        />
+      )}
 
       {/* NOTIFICACIÓN DE ÉXITO */}
 

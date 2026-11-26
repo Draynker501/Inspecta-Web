@@ -137,3 +137,18 @@ export type LocationFormConfig =
     kind: LocationKind;
     id: string;
   };
+
+// =====================================================
+// ACTUALIZACIÓN DE ESTADO
+// =====================================================
+
+export interface LocationStatusInput {
+  status: boolean;
+}
+
+export interface LocationStatusConfig {
+  kind: LocationKind;
+  id: string;
+  name: string;
+  status: boolean;
+}
