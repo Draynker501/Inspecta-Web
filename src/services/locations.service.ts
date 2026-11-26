@@ -1,10 +1,25 @@
+
 import { apiRequest } from "../api/client";
 
 import type {
   LocationHierarchyResponse,
   LocationPlant,
   LocationAreaOption,
+  LocationResponse,
+  PlantDetails,
+  AreaDetails,
+  ProductionLineDetails,
+  PlantCreateInput,
+  AreaCreateInput,
+  ProductionLineCreateInput,
+  PlantUpdateInput,
+  AreaUpdateInput,
+  ProductionLineUpdateInput,
 } from "../types/locations";
+
+// =====================================================
+// CONSULTA JERÁRQUICA
+// =====================================================
 
 export interface GetLocationHierarchyParams {
   page?: number;
@@ -85,4 +100,138 @@ export async function getLocationAreas(
         a.name.localeCompare(b.name, "es") ||
         a.plant_name.localeCompare(b.plant_name, "es")
     );
+}
+
+// =====================================================
+// ADMINISTRACIÓN DE PLANTAS
+// =====================================================
+
+export function getLocationPlant(
+  plantId: string,
+  signal?: AbortSignal
+): Promise<LocationResponse<PlantDetails>> {
+  return apiRequest<LocationResponse<PlantDetails>>(
+    `/plants/${encodeURIComponent(plantId)}`,
+    {
+      method: "GET",
+      signal,
+    }
+  );
+}
+
+export function createLocationPlant(
+  input: PlantCreateInput
+): Promise<LocationResponse<PlantDetails>> {
+  return apiRequest<LocationResponse<PlantDetails>>(
+    "/plants",
+    {
+      method: "POST",
+      body: input,
+    }
+  );
+}
+
+export function updateLocationPlant(
+  plantId: string,
+  input: PlantUpdateInput
+): Promise<LocationResponse<PlantDetails>> {
+  return apiRequest<LocationResponse<PlantDetails>>(
+    `/plants/${encodeURIComponent(plantId)}`,
+    {
+      method: "PATCH",
+      body: input,
+    }
+  );
+}
+
+// =====================================================
+// ADMINISTRACIÓN DE ÁREAS
+// =====================================================
+
+export function getLocationArea(
+  areaId: string,
+  signal?: AbortSignal
+): Promise<LocationResponse<AreaDetails>> {
+  return apiRequest<LocationResponse<AreaDetails>>(
+    `/areas/${encodeURIComponent(areaId)}`,
+    {
+      method: "GET",
+      signal,
+    }
+  );
+}
+
+export function createLocationArea(
+  plantId: string,
+  input: AreaCreateInput
+): Promise<LocationResponse<AreaDetails>> {
+  return apiRequest<LocationResponse<AreaDetails>>(
+    `/plants/${encodeURIComponent(plantId)}/areas`,
+    {
+      method: "POST",
+      body: input,
+    }
+  );
+}
+
+export function updateLocationArea(
+  areaId: string,
+  input: AreaUpdateInput
+): Promise<LocationResponse<AreaDetails>> {
+  return apiRequest<LocationResponse<AreaDetails>>(
+    `/areas/${encodeURIComponent(areaId)}`,
+    {
+      method: "PATCH",
+      body: input,
+    }
+  );
+}
+
+// =====================================================
+// ADMINISTRACIÓN DE LÍNEAS DE PRODUCCIÓN
+// =====================================================
+
+export function getLocationProductionLine(
+  lineId: string,
+  signal?: AbortSignal
+): Promise<LocationResponse<ProductionLineDetails>> {
+  return apiRequest<
+    LocationResponse<ProductionLineDetails>
+  >(
+    `/production-lines/${encodeURIComponent(lineId)}`,
+    {
+      method: "GET",
+      signal,
+    }
+  );
+}
+
+export function createLocationProductionLine(
+  areaId: string,
+  input: ProductionLineCreateInput
+): Promise<LocationResponse<ProductionLineDetails>> {
+  return apiRequest<
+    LocationResponse<ProductionLineDetails>
+  >(
+    `/areas/${encodeURIComponent(areaId)}/lines`,
+    {
+      method: "POST",
+      body: input,
+    }
+  );
+}
+
+export function updateLocationProductionLine(
+  lineId: string,
+  input: ProductionLineUpdateInput
+): Promise<LocationResponse<ProductionLineDetails>> {
+  return apiRequest<
+    LocationResponse<ProductionLineDetails>
+  >(
+    `/production-lines/${encodeURIComponent(lineId)}`,
+    {
+      method: "PATCH",
+      body: input,
+    }
+  );
 }

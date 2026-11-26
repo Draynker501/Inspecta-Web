@@ -1,4 +1,3 @@
-
 import {
   apiRequest,
   clearOrganizationId,
@@ -21,10 +20,15 @@ interface OrganizationsResponse {
   data: Organization[];
 }
 
-export async function getOrganizations(): Promise<Organization[]> {
+export async function getOrganizations(
+  signal?: AbortSignal
+): Promise<Organization[]> {
   const response = await apiRequest<OrganizationsResponse>(
     "/auth/organizations",
-    { method: "GET" }
+    {
+      method: "GET",
+      signal,
+    }
   );
 
   if (!Array.isArray(response.data)) {
@@ -36,7 +40,9 @@ export async function getOrganizations(): Promise<Organization[]> {
   return response.data;
 }
 
-export function selectOrganization(organization: Organization): void {
+export function selectOrganization(
+  organization: Organization
+): void {
   setOrganizationId(organization.id);
 }
 
