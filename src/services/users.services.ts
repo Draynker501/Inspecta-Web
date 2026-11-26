@@ -14,6 +14,7 @@ import type {
   AdministrationMembershipStatusInput,
   AdministrationUserRolesInput,
   AdministrationUserPasswordInput,
+  AdministrationUserLocationsInput
 } from "../types/administration";
 
 // =====================================================
@@ -173,6 +174,19 @@ export function updateUserPassword(
 ): Promise<ApiResponse<User>> {
   return apiRequest<ApiResponse<User>>(
     `/users/${encodeURIComponent(userId)}/password`,
+    {
+      method: "PUT",
+      body: data,
+    }
+  );
+}
+
+export function updateAdministrationUserLocations(
+  userId: string,
+  data: AdministrationUserLocationsInput
+): Promise<AdministrationUserResponse> {
+  return apiRequest(
+    `/users/${encodeURIComponent(userId)}/locations`,
     {
       method: "PUT",
       body: data,

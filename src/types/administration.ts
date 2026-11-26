@@ -167,3 +167,8 @@ export interface AdministrationRoleStatusInput {
 export interface AdministrationRolePermissionsInput {
     permissions: AdministrationPermissionKey[];
 }
+
+export interface AdministrationUserLocationsInput {
+    plant_ids: string[];
+    area_ids: string[];
+}

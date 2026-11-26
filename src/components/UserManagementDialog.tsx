@@ -23,10 +23,11 @@ import {
 import {
   Person,
   Security,
-  Business,
   Save,
   Refresh,
 } from "@mui/icons-material";
+
+import UserLocationsEditor from "./UserLocationsEditor";
 
 import { ApiError } from "../api/client";
 
@@ -74,6 +75,7 @@ interface OperationFeedback {
 
 type SavingOperation =
   | "roles"
+  | "locations"
   | "membership"
   | null;
 
@@ -233,6 +235,7 @@ export default function UserManagementDialog({
     useState<SavingOperation>(null);
 
   const savingRef = useRef(false);
+  const [locationsChanged, setLocationsChanged] = useState(false);
 
   const [refreshVersion, setRefreshVersion] =
     useState(0);
@@ -250,6 +253,7 @@ export default function UserManagementDialog({
     const controller = new AbortController();
 
     async function loadData() {
+      setLocationsChanged(false);
       setLoading(true);
       setError(null);
       setRolesError(null);
@@ -403,6 +407,7 @@ export default function UserManagementDialog({
   function toggleRole(role: AvailableRole) {
     if (
       !canEditRoles ||
+      locationsChanged ||
       savingRef.current
     ) {
       return;
@@ -442,6 +447,7 @@ export default function UserManagementDialog({
       !user ||
       !canEditRoles ||
       !rolesChanged ||
+      locationsChanged ||
       savingRef.current
     ) {
       return;
@@ -516,7 +522,7 @@ export default function UserManagementDialog({
       !user ||
       !pendingMembershipStatus ||
       savingRef.current ||
-      rolesChanged
+      rolesChanged || locationsChanged
     ) {
       return;
     }
@@ -580,7 +586,7 @@ export default function UserManagementDialog({
   function handleClose() {
     if (
       savingRef.current ||
-      rolesChanged
+      rolesChanged || locationsChanged
     ) {
       return;
     }
@@ -635,7 +641,7 @@ export default function UserManagementDialog({
               disabled={
                 loading ||
                 Boolean(saving) ||
-                rolesChanged
+                rolesChanged || locationsChanged
               }
               onClick={() =>
                 setRefreshVersion(
@@ -964,6 +970,7 @@ export default function UserManagementDialog({
                       variant="contained"
                       disabled={
                         !canEditRoles ||
+                        locationsChanged ||
                         !rolesChanged ||
                         Boolean(saving)
                       }
@@ -989,109 +996,20 @@ export default function UserManagementDialog({
 
                   <Divider />
 
-                  {/* UBICACIONES */}
-
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    sx={{ alignItems: "center" }}
-                  >
-                    <Business
-                      sx={{ color: "#2673C9" }}
-                    />
-
-                    <SectionHeader
-                      title="Ubicaciones"
-                      description="Ubicaciones visibles asociadas al usuario."
-                    />
-                  </Stack>
-
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700 }}
-                  >
-                    Plantas
-                  </Typography>
-
-                  {user.locations.plants.length ===
-                  0 ? (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
-                      Sin plantas visibles.
-                    </Typography>
-                  ) : (
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      useFlexGap
-                      sx={{ flexWrap: "wrap" }}
-                    >
-                      {user.locations.plants.map(
-                        (plant) => (
-                          <Chip
-                            key={plant.id}
-                            label={
-                              plant.status
-                                ? plant.name
-                                : `${plant.name} (inactiva)`
-                            }
-                            size="small"
-                            variant="outlined"
-                          />
-                        )
-                      )}
-                    </Stack>
-                  )}
-
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700 }}
-                  >
-                    Áreas
-                  </Typography>
-
-                  {user.locations.areas.length ===
-                  0 ? (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
-                      Sin áreas visibles.
-                    </Typography>
-                  ) : (
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      useFlexGap
-                      sx={{ flexWrap: "wrap" }}
-                    >
-                      {user.locations.areas.map(
-                        (area) => (
-                          <Chip
-                            key={area.id}
-                            label={
-                              area.status
-                                ? area.name
-                                : `${area.name} (inactiva)`
-                            }
-                            size="small"
-                            variant="outlined"
-                          />
-                        )
-                      )}
-                    </Stack>
-                  )}
-
-                  <Alert severity="info">
-                    La modificación de ubicaciones
-                    se incorporará posteriormente.
-                  </Alert>
+                  <UserLocationsEditor
+                    key={user.id}
+                    user={user}
+                    disabled={Boolean(saving) || rolesChanged || pendingMembershipStatus !== null}
+                    onDirtyChange={setLocationsChanged}
+                    onSavingChange={(active) => {
+                      savingRef.current = active;
+                      setSaving(active ? "locations" : null);
+                    }}
+                    onSaved={(updatedUser, message) => {
+                      setUser(updatedUser);
+                      onSaved(updatedUser, message);
+                    }}
+                  />
 
                   <Divider />
 
@@ -1140,7 +1058,7 @@ export default function UserManagementDialog({
                       }
                       disabled={
                         Boolean(saving) ||
-                        rolesChanged ||
+                        rolesChanged || locationsChanged ||
                         (
                           user.membership.status ===
                             "revoked" &&
@@ -1183,7 +1101,7 @@ export default function UserManagementDialog({
             onClick={handleClose}
             disabled={
               Boolean(saving) ||
-              rolesChanged
+              rolesChanged || locationsChanged
             }
           >
             Cerrar
