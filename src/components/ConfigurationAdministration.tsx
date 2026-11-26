@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
 
 import {
   Alert,
@@ -13,15 +12,13 @@ import {
   Divider,
   Grid,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 
 import {
   Business,
   Refresh,
-  Security,
-  Settings,
+  InfoOutlined,
 } from "@mui/icons-material";
 
 import {
@@ -34,89 +31,50 @@ import type {
 } from "../services/organizations.service";
 
 // =====================================================
-// ENCABEZADO DE TARJETAS
+// CAMPO DE INFORMACIÓN
 // =====================================================
 
-interface ConfigurationCardHeaderProps {
-  title: string;
-  description: string;
-  icon: ReactNode;
-  backgroundColor: string;
-}
-
-function ConfigurationCardHeader({
-  title,
-  description,
-  icon,
-  backgroundColor,
-}: ConfigurationCardHeaderProps) {
-  return (
-    <Stack
-      direction="row"
-      spacing={2}
-      sx={{ alignItems: "center" }}
-    >
-      <Box
-        sx={{
-          width: 44,
-          height: 44,
-          flexShrink: 0,
-          borderRadius: 2,
-          backgroundColor,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {icon}
-      </Box>
-
-      <Box>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            color: "#16324F",
-          }}
-        >
-          {title}
-        </Typography>
-
-        <Typography
-          variant="body2"
-          sx={{ color: "#81909D" }}
-        >
-          {description}
-        </Typography>
-      </Box>
-    </Stack>
-  );
-}
-
-// =====================================================
-// CAMPO DE SOLO LECTURA
-// =====================================================
-
-interface ReadOnlyFieldProps {
+interface OrganizationFieldProps {
   label: string;
-  value: string | null | undefined;
+  value: string;
 }
 
-function ReadOnlyField({
+function OrganizationField({
   label,
   value,
-}: ReadOnlyFieldProps) {
+}: OrganizationFieldProps) {
   return (
-    <TextField
-      fullWidth
-      label={label}
-      value={value ?? "No disponible"}
-      slotProps={{
-        htmlInput: {
-          readOnly: true,
-        },
+    <Box
+      sx={{
+        p: 2,
+        height: "100%",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 2,
+        backgroundColor: "background.default",
       }}
-    />
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 0.75,
+        }}
+      >
+        {label}
+      </Typography>
+
+      <Typography
+        variant="body1"
+        sx={{
+          fontWeight: 600,
+          color: "#16324F",
+          overflowWrap: "anywhere",
+        }}
+      >
+        {value}
+      </Typography>
+    </Box>
   );
 }
 
@@ -140,14 +98,14 @@ export default function ConfigurationAdministration() {
   const organizationId =
     getSelectedOrganizationId();
 
-  // ===================================================
+  // =================================================
   // CONSULTAR ORGANIZACIÓN ACTUAL
-  // ===================================================
+  // =================================================
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadConfiguration() {
+    async function loadOrganization() {
       setLoading(true);
       setError(null);
       setOrganization(null);
@@ -159,10 +117,9 @@ export default function ConfigurationAdministration() {
           );
         }
 
-        const organizations =
-          await getOrganizations(
-            controller.signal
-          );
+        const organizations = await getOrganizations(
+          controller.signal
+        );
 
         if (controller.signal.aborted) {
           return;
@@ -175,9 +132,7 @@ export default function ConfigurationAdministration() {
 
         if (!currentOrganization) {
           throw new Error(
-            "No fue posible encontrar la " +
-              "organización seleccionada entre " +
-              "tus organizaciones disponibles."
+            "No fue posible encontrar la organización seleccionada."
           );
         }
 
@@ -190,8 +145,7 @@ export default function ConfigurationAdministration() {
         setError(
           err instanceof Error
             ? err.message
-            : "No fue posible consultar " +
-              "la configuración."
+            : "No fue posible consultar la organización."
         );
       } finally {
         if (!controller.signal.aborted) {
@@ -200,14 +154,10 @@ export default function ConfigurationAdministration() {
       }
     }
 
-    void loadConfiguration();
+    void loadOrganization();
 
     return () => controller.abort();
   }, [organizationId, refreshVersion]);
-
-  // ===================================================
-  // ACTUALIZAR INFORMACIÓN
-  // ===================================================
 
   function refresh() {
     setRefreshVersion(
@@ -215,9 +165,22 @@ export default function ConfigurationAdministration() {
     );
   }
 
-  // ===================================================
+  function getOrganizationType(type: string): string {
+    switch (type) {
+      case "client":
+        return "Cliente";
+
+      case "operator":
+        return "Operadora";
+
+      default:
+        return type;
+    }
+  }
+
+  // =================================================
   // INTERFAZ
-  // ===================================================
+  // =================================================
 
   return (
     <Stack spacing={3}>
@@ -242,29 +205,43 @@ export default function ConfigurationAdministration() {
               color: "#16324F",
             }}
           >
-            Configuración general
+            Organización
           </Typography>
 
           <Typography
             variant="body2"
-            sx={{ color: "#81909D" }}
+            sx={{
+              color: "text.secondary",
+            }}
           >
-            Consulta la información general
-            de tu organización en INSPECTA.
+            Consulta la información general de tu
+            organización actual.
           </Typography>
         </Box>
 
         <Button
           variant="outlined"
-          startIcon={<Refresh />}
+          startIcon={
+            loading ? (
+              <CircularProgress
+                size={18}
+                color="inherit"
+              />
+            ) : (
+              <Refresh />
+            )
+          }
           onClick={refresh}
           disabled={loading}
+          sx={{
+            textTransform: "none",
+          }}
         >
           Actualizar
         </Button>
       </Stack>
 
-      {/* CARGA */}
+      {/* ESTADO DE CARGA */}
 
       {loading ? (
         <Stack
@@ -278,9 +255,11 @@ export default function ConfigurationAdministration() {
 
           <Typography
             variant="body2"
-            sx={{ color: "text.secondary" }}
+            sx={{
+              color: "text.secondary",
+            }}
           >
-            Cargando configuración...
+            Cargando información de la organización...
           </Typography>
         </Stack>
       ) : error ? (
@@ -304,83 +283,64 @@ export default function ConfigurationAdministration() {
 
           <Card
             variant="outlined"
-            sx={{ boxShadow: "none" }}
+            sx={{
+              boxShadow: "none",
+            }}
           >
-            <CardContent>
+            <CardContent
+              sx={{
+                p: { xs: 2, md: 3 },
+              }}
+            >
               <Stack spacing={3}>
-                <ConfigurationCardHeader
-                  title="Información de la organización"
-                  description="Datos generales del espacio de trabajo seleccionado."
-                  icon={
-                    <Business
-                      sx={{ color: "#16324F" }}
-                    />
-                  }
-                  backgroundColor="#E8F0F6"
-                />
-
-                <Divider />
-
-                <Grid container spacing={3}>
-                  <Grid
-                    size={{ xs: 12, md: 6 }}
-                  >
-                    <ReadOnlyField
-                      label="Nombre de la organización"
-                      value={organization.name}
-                    />
-                  </Grid>
-
-                  <Grid
-                    size={{ xs: 12, md: 6 }}
-                  >
-                    <ReadOnlyField
-                      label="Código de organización"
-                      value={organization.code}
-                    />
-                  </Grid>
-
-                  <Grid
-                    size={{ xs: 12, md: 6 }}
-                  >
-                    <ReadOnlyField
-                      label="Tipo de organización"
-                      value={
-                        organization.type === "client"
-                          ? "Cliente"
-                          : organization.type
-                      }
-                    />
-                  </Grid>
-
-                  <Grid
-                    size={{ xs: 12, md: 6 }}
-                  >
-                    <ReadOnlyField
-                      label="Identificador"
-                      value={organization.id}
-                    />
-                  </Grid>
-                </Grid>
-
                 <Stack
                   direction="row"
-                  spacing={1}
-                  useFlexGap
+                  spacing={2}
                   sx={{
                     alignItems: "center",
-                    flexWrap: "wrap",
                   }}
                 >
-                  <Typography
-                    variant="body2"
+                  <Box
                     sx={{
-                      fontWeight: 600,
-                      color: "#16324F",
+                      width: 52,
+                      height: 52,
+                      flexShrink: 0,
+                      borderRadius: 2,
+                      backgroundColor: "#E8F0F6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    Estado de la organización:
-                  </Typography>
+                    <Business
+                      sx={{
+                        color: "#16324F",
+                        fontSize: 28,
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        color: "#16324F",
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {organization.name}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
+                      Organización actual
+                    </Typography>
+                  </Box>
 
                   <Chip
                     label={
@@ -396,126 +356,87 @@ export default function ConfigurationAdministration() {
                     size="small"
                   />
                 </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
-
-          {/* MEMBRESÍA Y ACCESO */}
-
-          <Card
-            variant="outlined"
-            sx={{ boxShadow: "none" }}
-          >
-            <CardContent>
-              <Stack spacing={3}>
-                <ConfigurationCardHeader
-                  title="Membresía y acceso"
-                  description="Información de tu relación con la organización actual."
-                  icon={
-                    <Security
-                      sx={{ color: "#0F9D8A" }}
-                    />
-                  }
-                  backgroundColor="#E8F5F2"
-                />
 
                 <Divider />
 
-                <Grid container spacing={3}>
+                <Grid container spacing={2}>
                   <Grid
-                    size={{ xs: 12, md: 8 }}
+                    size={{ xs: 12, md: 6 }}
                   >
-                    <ReadOnlyField
-                      label="Identificador de membresía"
+                    <OrganizationField
+                      label="Nombre de la organización"
+                      value={organization.name}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{ xs: 12, md: 6 }}
+                  >
+                    <OrganizationField
+                      label="Código de organización"
+                      value={organization.code}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{ xs: 12, md: 6 }}
+                  >
+                    <OrganizationField
+                      label="Tipo de organización"
+                      value={getOrganizationType(
+                        organization.type
+                      )}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{ xs: 12, md: 6 }}
+                  >
+                    <OrganizationField
+                      label="Estado de la organización"
                       value={
-                        organization.membership_id
+                        organization.status
+                          ? "Activa"
+                          : "Inactiva"
                       }
                     />
                   </Grid>
-
-                  <Grid
-                    size={{ xs: 12, md: 4 }}
-                  >
-                    <Stack
-                      spacing={1}
-                      sx={{
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        Estado de membresía
-                      </Typography>
-
-                      <Chip
-                        label={
-                          organization.membership_status ===
-                          "active"
-                            ? "Activa"
-                            : organization.membership_status ===
-                              "revoked"
-                            ? "Revocada"
-                            : "Estado desconocido"
-                        }
-                        color={
-                          organization.membership_status ===
-                          "active"
-                            ? "success"
-                            : "default"
-                        }
-                        size="small"
-                      />
-                    </Stack>
-                  </Grid>
                 </Grid>
-
-                <Alert severity="info">
-                  Los usuarios, roles y ubicaciones
-                  se administran dentro del contexto
-                  de la organización seleccionada.
-                </Alert>
               </Stack>
             </CardContent>
           </Card>
 
-          {/* PREFERENCIAS */}
+          {/* INFORMACIÓN ADMINISTRATIVA */}
 
-          <Card
+          <Alert
+            severity="info"
+            icon={<InfoOutlined />}
             variant="outlined"
-            sx={{ boxShadow: "none" }}
           >
-            <CardContent>
-              <Stack spacing={2}>
-                <ConfigurationCardHeader
-                  title="Preferencias de la organización"
-                  description="Configuración adicional de la plataforma."
-                  icon={
-                    <Settings
-                      sx={{ color: "#16324F" }}
-                    />
-                  }
-                  backgroundColor="#F0F2F5"
-                />
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                mb: 0.5,
+              }}
+            >
+              Información de solo lectura
+            </Typography>
 
-                <Divider />
-
-                <Alert severity="info">
-                  La edición de preferencias de
-                  la organización no se encuentra
-                  disponible actualmente.
-                </Alert>
-              </Stack>
-            </CardContent>
-          </Card>
+            <Typography variant="body2">
+              Los datos generales de la organización
+              no pueden modificarse desde este módulo.
+              La administración de usuarios, roles,
+              permisos y ubicaciones se realiza desde
+              sus respectivas pestañas, de acuerdo
+              con tus permisos asignados.
+            </Typography>
+          </Alert>
         </>
       ) : (
-        <Alert severity="info">
-          No hay información de la organización
-          disponible.
+        <Alert severity="warning">
+          No hay información disponible de la
+          organización seleccionada.
         </Alert>
       )}
     </Stack>

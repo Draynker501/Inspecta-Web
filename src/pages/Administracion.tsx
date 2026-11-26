@@ -411,7 +411,7 @@ export default function Administracion() {
             <Tab
               icon={<Settings />}
               iconPosition="start"
-              label="Configuración"
+              label="Organización"
             />
           </Tabs>
         </Box>
