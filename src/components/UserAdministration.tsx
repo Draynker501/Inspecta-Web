@@ -23,33 +23,33 @@ import {
   Search,
 } from "@mui/icons-material";
 
+import { ApiError } from "../api/client";
+
 import {
   getAdministrationUsers,
 } from "../services/users.services";
+
+import UserManagementDialog
+  from "./UserManagementDialog";
 
 import type {
   AdministrationUser,
   MembershipStatus,
 } from "../types/administration";
 
+// =====================================================
+// TIPOS
+// =====================================================
+
 const PER_PAGE = 15;
 
-type StatusFilter = "all" | MembershipStatus;
+type StatusFilter =
+  | "all"
+  | MembershipStatus;
 
-const TABLE_HEADERS = [
-  "Usuario",
-  "Plantas",
-  "Áreas",
-  "Roles",
-  "Estado",
-  "Acción",
-];
-
-const CELL_STYLES = {
-  padding: "16px 12px",
-  borderBottom: "1px solid #DCE6EE",
-  verticalAlign: "middle",
-};
+interface UserAdministrationProps {
+  onChanged?: () => void;
+}
 
 // =====================================================
 // ESTADO DEL USUARIO
@@ -60,10 +60,12 @@ function UserStatus({
 }: {
   user: AdministrationUser;
 }) {
-  if (user.membership.status === "revoked") {
+  if (
+    user.membership.status === "revoked"
+  ) {
     return (
       <Chip
-        label="Revocado"
+        label="Membresía revocada"
         size="small"
         color="default"
       />
@@ -93,40 +95,66 @@ function UserStatus({
 // COMPONENTE PRINCIPAL
 // =====================================================
 
-export default function UserAdministration() {
+export default function UserAdministration({
+  onChanged,
+}: UserAdministrationProps) {
   const [users, setUsers] =
     useState<AdministrationUser[]>([]);
 
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] =
+  const [search, setSearch] =
     useState("");
+
+  const [
+    debouncedSearch,
+    setDebouncedSearch,
+  ] = useState("");
 
   const [status, setStatus] =
     useState<StatusFilter>("all");
 
-  const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [page, setPage] =
+    useState(1);
 
-  const [loading, setLoading] = useState(true);
+  const [lastPage, setLastPage] =
+    useState(1);
+
+  const [total, setTotal] =
+    useState(0);
+
+  const [loading, setLoading] =
+    useState(true);
 
   const [error, setError] =
     useState<string | null>(null);
 
-  const [refreshVersion, setRefreshVersion] =
-    useState(0);
+  const [
+    refreshVersion,
+    setRefreshVersion,
+  ] = useState(0);
+
+  const [
+    selectedUserId,
+    setSelectedUserId,
+  ] = useState<string | null>(null);
 
   // ===================================================
-  // BÚSQUEDA CON DEBOUNCE
+  // BÚSQUEDA
   // ===================================================
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim());
-      setPage(1);
-    }, 400);
+    const timeout = window.setTimeout(
+      () => {
+        setDebouncedSearch(
+          search.trim()
+        );
 
-    return () => window.clearTimeout(timeout);
+        setPage(1);
+      },
+      400
+    );
+
+    return () =>
+      window.clearTimeout(timeout);
   }, [search]);
 
   // ===================================================
@@ -134,7 +162,8 @@ export default function UserAdministration() {
   // ===================================================
 
   useEffect(() => {
-    const controller = new AbortController();
+    const controller =
+      new AbortController();
 
     async function loadUsers() {
       setLoading(true);
@@ -159,10 +188,11 @@ export default function UserAdministration() {
           return;
         }
 
-        const nextLastPage = Math.max(
-          1,
-          response.meta.last_page
-        );
+        const nextLastPage =
+          Math.max(
+            1,
+            response.meta.last_page
+          );
 
         if (page > nextLastPage) {
           setPage(nextLastPage);
@@ -181,11 +211,21 @@ export default function UserAdministration() {
         setTotal(0);
         setLastPage(1);
 
-        setError(
-          err instanceof Error
-            ? err.message
-            : "No fue posible consultar los usuarios."
-        );
+        if (
+          err instanceof ApiError &&
+          err.status === 403
+        ) {
+          setError(
+            "No tienes permisos para consultar " +
+              "los usuarios de esta organización."
+          );
+        } else {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "No fue posible consultar los usuarios."
+          );
+        }
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -198,22 +238,39 @@ export default function UserAdministration() {
     return () => controller.abort();
   }, [
     page,
-    debouncedSearch,
     status,
+    debouncedSearch,
     refreshVersion,
   ]);
 
   // ===================================================
-  // ACCIONES
+  // ACTUALIZAR LISTADO
   // ===================================================
 
   function refresh() {
-    setRefreshVersion((current) => current + 1);
+    setRefreshVersion(
+      (current) => current + 1
+    );
   }
 
-  function changeStatus(value: StatusFilter) {
-    setStatus(value);
-    setPage(1);
+  // ===================================================
+  // USUARIO MODIFICADO
+  // ===================================================
+
+  function handleUserSaved(
+    updatedUser: AdministrationUser
+  ) {
+    setUsers((current) =>
+      current.map((user) =>
+        user.id === updatedUser.id
+          ? updatedUser
+          : user
+      )
+    );
+
+    refresh();
+
+    onChanged?.();
   }
 
   // ===================================================
@@ -222,6 +279,28 @@ export default function UserAdministration() {
 
   return (
     <Stack spacing={3}>
+      {/* ENCABEZADO */}
+
+      <Box>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            color: "#16324F",
+          }}
+        >
+          Usuarios
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{ color: "#81909D" }}
+        >
+          Consulta y administra los usuarios
+          de la organización.
+        </Typography>
+      </Box>
+
       {/* FILTROS */}
 
       <Stack
@@ -266,28 +345,34 @@ export default function UserAdministration() {
           direction={{ xs: "column", sm: "row" }}
           spacing={2}
         >
-          <FormControl sx={{ minWidth: 180 }}>
-            <InputLabel>Estado</InputLabel>
+          <FormControl
+            sx={{ minWidth: 190 }}
+          >
+            <InputLabel>
+              Estado
+            </InputLabel>
 
             <Select
               value={status}
               label="Estado"
-              onChange={(event) =>
-                changeStatus(
+              onChange={(event) => {
+                setStatus(
                   event.target.value as StatusFilter
-                )
-              }
+                );
+
+                setPage(1);
+              }}
             >
               <MenuItem value="all">
                 Todos
               </MenuItem>
 
               <MenuItem value="active">
-                Membresía activa
+                Membresías activas
               </MenuItem>
 
               <MenuItem value="revoked">
-                Revocados
+                Membresías revocadas
               </MenuItem>
             </Select>
           </FormControl>
@@ -322,7 +407,7 @@ export default function UserAdministration() {
         </Alert>
       )}
 
-      {/* CARGA */}
+      {/* LISTADO */}
 
       {loading ? (
         <Stack
@@ -336,7 +421,9 @@ export default function UserAdministration() {
 
           <Typography
             variant="body2"
-            sx={{ color: "text.secondary" }}
+            sx={{
+              color: "text.secondary",
+            }}
           >
             Cargando usuarios...
           </Typography>
@@ -345,45 +432,59 @@ export default function UserAdministration() {
         <>
           <Typography
             variant="body2"
-            sx={{ color: "text.secondary" }}
+            sx={{
+              color: "text.secondary",
+            }}
           >
             Usuarios encontrados: {total}
           </Typography>
 
           {users.length === 0 ? (
             <Alert severity="info">
-              No se encontraron usuarios con
-              los filtros seleccionados.
+              No se encontraron usuarios
+              con los filtros seleccionados.
             </Alert>
           ) : (
-            <Box sx={{ overflowX: "auto" }}>
+            <Box
+              sx={{
+                overflowX: "auto",
+                border: "1px solid #DCE6EE",
+                borderRadius: 2,
+              }}
+            >
               <Box
                 component="table"
                 sx={{
                   width: "100%",
+                  minWidth: 850,
                   borderCollapse: "collapse",
-                  minWidth: 900,
+
+                  "& th": {
+                    textAlign: "left",
+                    backgroundColor: "#F4F7FA",
+                    color: "#16324F",
+                    fontWeight: 700,
+                    fontSize: "0.85rem",
+                    p: 2,
+                    whiteSpace: "nowrap",
+                  },
+
+                  "& td": {
+                    p: 2,
+                    borderTop:
+                      "1px solid #DCE6EE",
+                    verticalAlign: "middle",
+                  },
                 }}
               >
                 <thead>
                   <tr>
-                    {TABLE_HEADERS.map((header) => (
-                      <Box
-                        component="th"
-                        key={header}
-                        sx={{
-                          textAlign: "left",
-                          padding: "14px 12px",
-                          borderBottom:
-                            "1px solid #DCE6EE",
-                          color: "#81909D",
-                          fontSize: 13,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {header}
-                      </Box>
-                    ))}
+                    <th>Usuario</th>
+                    <th>Plantas</th>
+                    <th>Áreas</th>
+                    <th>Roles</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
                   </tr>
                 </thead>
 
@@ -392,14 +493,11 @@ export default function UserAdministration() {
                     <tr key={user.id}>
                       {/* USUARIO */}
 
-                      <Box
-                        component="td"
-                        sx={CELL_STYLES}
-                      >
+                      <td>
                         <Typography
                           variant="body2"
                           sx={{
-                            fontWeight: 600,
+                            fontWeight: 700,
                             color: "#16324F",
                           }}
                         >
@@ -408,151 +506,131 @@ export default function UserAdministration() {
 
                         <Typography
                           variant="caption"
-                          sx={{ color: "#81909D" }}
+                          sx={{
+                            color: "#81909D",
+                          }}
                         >
                           {user.email}
                         </Typography>
-                      </Box>
+                      </td>
 
                       {/* PLANTAS */}
 
-                      <Box
-                        component="td"
-                        sx={CELL_STYLES}
-                      >
-                        {user.locations.plants.length >
-                        0 ? (
-                          <Stack spacing={0.5}>
-                            {user.locations.plants.map(
-                              (plant) => (
-                                <Typography
-                                  key={plant.id}
-                                  variant="body2"
-                                >
-                                  {plant.name}
-                                </Typography>
-                              )
-                            )}
-                          </Stack>
-                        ) : (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                            }}
-                          >
-                            Sin plantas visibles
-                          </Typography>
-                        )}
-                      </Box>
+                      <td>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color:
+                              user.locations.plants
+                                .length === 0
+                                ? "text.secondary"
+                                : "#16324F",
+                          }}
+                        >
+                          {user.locations.plants
+                            .length > 0
+                            ? user.locations.plants
+                                .map(
+                                  (plant) =>
+                                    plant.name
+                                )
+                                .join(", ")
+                            : "Sin plantas visibles"}
+                        </Typography>
+                      </td>
 
                       {/* ÁREAS */}
 
-                      <Box
-                        component="td"
-                        sx={CELL_STYLES}
-                      >
-                        {user.locations.areas.length >
-                        0 ? (
-                          <Stack spacing={0.5}>
-                            {user.locations.areas.map(
-                              (area) => (
-                                <Typography
-                                  key={area.id}
-                                  variant="body2"
-                                >
-                                  {area.name}
-                                </Typography>
-                              )
-                            )}
-                          </Stack>
-                        ) : (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                            }}
-                          >
-                            Sin áreas visibles
-                          </Typography>
-                        )}
-                      </Box>
+                      <td>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color:
+                              user.locations.areas
+                                .length === 0
+                                ? "text.secondary"
+                                : "#16324F",
+                          }}
+                        >
+                          {user.locations.areas
+                            .length > 0
+                            ? user.locations.areas
+                                .map(
+                                  (area) =>
+                                    area.name
+                                )
+                                .join(", ")
+                            : "Sin áreas visibles"}
+                        </Typography>
+                      </td>
 
                       {/* ROLES */}
 
-                      <Box
-                        component="td"
-                        sx={CELL_STYLES}
-                      >
-                        {user.roles.length > 0 ? (
+                      <td>
+                        {user.roles.length === 0 ? (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color:
+                                "text.secondary",
+                            }}
+                          >
+                            Sin roles asignados
+                          </Typography>
+                        ) : (
                           <Stack
                             direction="row"
-                            spacing={0.5}
+                            spacing={0.75}
                             useFlexGap
                             sx={{
                               flexWrap: "wrap",
                             }}
                           >
-                            {user.roles.map((role) => (
-                              <Chip
-                                key={role.id}
-                                label={
-                                  role.status
-                                    ? role.name
-                                    : `${role.name} (inactivo)`
-                                }
-                                size="small"
-                                variant={
-                                  role.status
-                                    ? "filled"
-                                    : "outlined"
-                                }
-                              />
-                            ))}
+                            {user.roles.map(
+                              (role) => (
+                                <Chip
+                                  key={role.id}
+                                  label={
+                                    role.status
+                                      ? role.name
+                                      : `${role.name} (inactivo)`
+                                  }
+                                  size="small"
+                                  variant="outlined"
+                                />
+                              )
+                            )}
                           </Stack>
-                        ) : (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                            }}
-                          >
-                            Sin roles
-                          </Typography>
                         )}
-                      </Box>
+                      </td>
 
                       {/* ESTADO */}
 
-                      <Box
-                        component="td"
-                        sx={CELL_STYLES}
-                      >
+                      <td>
                         <UserStatus user={user} />
-                      </Box>
+                      </td>
 
                       {/* ACCIONES */}
 
-                      <Box
-                        component="td"
-                        sx={CELL_STYLES}
-                      >
+                      <td>
                         <Button
                           size="small"
                           startIcon={<Edit />}
-                          disabled
+                          onClick={() =>
+                            setSelectedUserId(
+                              user.id
+                            )
+                          }
                         >
                           Editar
                         </Button>
-                      </Box>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </Box>
             </Box>
           )}
-
-          {/* PAGINACIÓN */}
 
           {lastPage > 1 && (
             <Stack
@@ -574,6 +652,19 @@ export default function UserAdministration() {
           )}
         </>
       ) : null}
+
+      {/* ADMINISTRACIÓN DEL USUARIO */}
+
+      {selectedUserId && (
+        <UserManagementDialog
+          key={`manage-user-${selectedUserId}`}
+          userId={selectedUserId}
+          onClose={() =>
+            setSelectedUserId(null)
+          }
+          onSaved={handleUserSaved}
+        />
+      )}
     </Stack>
   );
 }

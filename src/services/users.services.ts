@@ -10,10 +10,14 @@ import type {
   AdministrationUsersResponse,
   AdministrationUserResponse,
   GetAdministrationUsersParams,
+  AdministrationUserCreateInput,
+  AdministrationMembershipStatusInput,
+  AdministrationUserRolesInput,
+  AdministrationUserPasswordInput,
 } from "../types/administration";
 
 // =====================================================
-// COMPATIBILIDAD CON MÓDULOS EXISTENTES
+// TIPOS EXISTENTES
 // =====================================================
 
 export interface User {
@@ -29,6 +33,10 @@ export interface UsersResponse {
   data: User[];
   meta: PaginationMeta;
 }
+
+// =====================================================
+// CONSULTAS EXISTENTES
+// =====================================================
 
 export function getUsers(
   page = 1,
@@ -53,7 +61,7 @@ export function getUser(
 }
 
 // =====================================================
-// ADMINISTRACIÓN DE USUARIOS
+// LISTADO ADMINISTRATIVO
 // =====================================================
 
 export function getAdministrationUsers(
@@ -88,6 +96,10 @@ export function getAdministrationUsers(
   );
 }
 
+// =====================================================
+// CONSULTAR USUARIO
+// =====================================================
+
 export function getAdministrationUser(
   userId: string,
   signal?: AbortSignal
@@ -97,6 +109,73 @@ export function getAdministrationUser(
     {
       method: "GET",
       signal,
+    }
+  );
+}
+
+// =====================================================
+// CREAR USUARIO
+// =====================================================
+
+export function createAdministrationUser(
+  data: AdministrationUserCreateInput
+): Promise<AdministrationUserResponse> {
+  return apiRequest<AdministrationUserResponse>(
+    "/users",
+    {
+      method: "POST",
+      body: data,
+    }
+  );
+}
+
+// =====================================================
+// CAMBIAR ESTADO DE MEMBRESÍA
+// =====================================================
+
+export function updateAdministrationMembershipStatus(
+  userId: string,
+  data: AdministrationMembershipStatusInput
+): Promise<AdministrationUserResponse> {
+  return apiRequest<AdministrationUserResponse>(
+    `/users/${encodeURIComponent(userId)}/membership/status`,
+    {
+      method: "PATCH",
+      body: data,
+    }
+  );
+}
+
+// =====================================================
+// SUSTITUIR ROLES ASIGNADOS
+// =====================================================
+
+export function updateAdministrationUserRoles(
+  userId: string,
+  data: AdministrationUserRolesInput
+): Promise<AdministrationUserResponse> {
+  return apiRequest<AdministrationUserResponse>(
+    `/users/${encodeURIComponent(userId)}/roles`,
+    {
+      method: "PUT",
+      body: data,
+    }
+  );
+}
+
+// =====================================================
+// CAMBIAR CONTRASEÑA
+// =====================================================
+
+export function updateUserPassword(
+  userId: string,
+  data: AdministrationUserPasswordInput
+): Promise<ApiResponse<User>> {
+  return apiRequest<ApiResponse<User>>(
+    `/users/${encodeURIComponent(userId)}/password`,
+    {
+      method: "PUT",
+      body: data,
     }
   );
 }

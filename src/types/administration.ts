@@ -120,3 +120,28 @@ export interface GetAdministrationRolesParams {
     q?: string;
     status?: boolean;
 }
+
+// =====================================================
+// OPERACIONES DE ESCRITURA DE USUARIOS
+// =====================================================
+
+export interface AdministrationUserCreateInput {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+}
+
+export interface AdministrationMembershipStatusInput {
+    status: MembershipStatus;
+}
+
+export interface AdministrationUserRolesInput {
+    role_ids: string[];
+}
+
+export interface AdministrationUserPasswordInput {
+    current_password: string;
+    new_password: string;
+    new_password_confirmation: string;
+}

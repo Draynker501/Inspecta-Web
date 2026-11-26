@@ -2,11 +2,13 @@
 import { useEffect, useState } from "react";
 
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
   Grid,
+  Snackbar,
   Stack,
   Tab,
   Tabs,
@@ -34,6 +36,9 @@ import LocationAdministration
 import ConfigurationAdministration
   from "../components/ConfigurationAdministration";
 
+import UserFormDialog
+  from "../components/UserFormDialog";
+
 import {
   getAdministrationUsers,
 } from "../services/users.services";
@@ -45,6 +50,10 @@ import {
 import {
   getLocationAreas,
 } from "../services/locations.service";
+
+import type {
+  AdministrationUser,
+} from "../types/administration";
 
 // =====================================================
 // TIPOS
@@ -76,6 +85,18 @@ export default function Administracion() {
       EMPTY_SUMMARY
     );
 
+  const [userFormOpen, setUserFormOpen] =
+    useState(false);
+
+  const [usersRefreshVersion, setUsersRefreshVersion] =
+    useState(0);
+
+  const [summaryRefreshVersion, setSummaryRefreshVersion] =
+    useState(0);
+
+  const [successMessage, setSuccessMessage] =
+    useState<string | null>(null);
+
   // ===================================================
   // CONSULTAR INDICADORES
   // ===================================================
@@ -84,9 +105,7 @@ export default function Administracion() {
     const controller = new AbortController();
 
     async function loadSummary() {
-      setSummary({
-        ...EMPTY_SUMMARY,
-      });
+      setSummary({ ...EMPTY_SUMMARY });
 
       const [
         usersResult,
@@ -136,7 +155,7 @@ export default function Administracion() {
 
         activeMemberships:
           activeMembershipsResult.status ===
-          "fulfilled"
+            "fulfilled"
             ? activeMembershipsResult.value.meta.total
             : null,
 
@@ -155,7 +174,29 @@ export default function Administracion() {
     void loadSummary();
 
     return () => controller.abort();
-  }, [tab]);
+  }, [tab, summaryRefreshVersion]);
+
+  // ===================================================
+  // USUARIO CREADO
+  // ===================================================
+
+  function handleUserSaved(
+    user: AdministrationUser
+  ) {
+    setUserFormOpen(false);
+
+    setUsersRefreshVersion(
+      (current) => current + 1
+    );
+
+    setSummaryRefreshVersion(
+      (current) => current + 1
+    );
+
+    setSuccessMessage(
+      `El usuario ${user.name} se creó correctamente.`
+    );
+  }
 
   // ===================================================
   // TARJETAS DE RESUMEN
@@ -255,7 +296,9 @@ export default function Administracion() {
           <Button
             variant="contained"
             startIcon={<Add />}
-            disabled
+            onClick={() =>
+              setUserFormOpen(true)
+            }
           >
             Nuevo usuario
           </Button>
@@ -377,7 +420,14 @@ export default function Administracion() {
 
         {tab === 0 && (
           <CardContent>
-            <UserAdministration />
+            <UserAdministration
+              key={`users-${usersRefreshVersion}`}
+              onChanged={() =>
+                setSummaryRefreshVersion(
+                  (current) => current + 1
+                )
+              }
+            />
           </CardContent>
         )}
 
@@ -405,6 +455,41 @@ export default function Administracion() {
           </CardContent>
         )}
       </Card>
+
+      {/* FORMULARIO DE USUARIO */}
+
+      {userFormOpen && (
+        <UserFormDialog
+          onClose={() =>
+            setUserFormOpen(false)
+          }
+          onSaved={handleUserSaved}
+        />
+      )}
+
+      {/* NOTIFICACIÓN */}
+
+      <Snackbar
+        open={Boolean(successMessage)}
+        autoHideDuration={5000}
+        onClose={() =>
+          setSuccessMessage(null)
+        }
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          severity="success"
+          onClose={() =>
+            setSuccessMessage(null)
+          }
+          sx={{ width: "100%" }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </section>
   );
 }
