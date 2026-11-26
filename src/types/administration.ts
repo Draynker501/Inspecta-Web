@@ -145,3 +145,25 @@ export interface AdministrationUserPasswordInput {
     new_password: string;
     new_password_confirmation: string;
 }
+
+// =====================================================
+// OPERACIONES DE ESCRITURA DE ROLES
+// =====================================================
+
+export interface AdministrationRoleCreateInput {
+    name: string;
+    description?: string | null;
+}
+
+export interface AdministrationRoleUpdateInput {
+    name?: string;
+    description?: string | null;
+}
+
+export interface AdministrationRoleStatusInput {
+    status: boolean;
+}
+
+export interface AdministrationRolePermissionsInput {
+    permissions: AdministrationPermissionKey[];
+}

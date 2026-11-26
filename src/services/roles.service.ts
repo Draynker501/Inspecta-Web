@@ -6,10 +6,14 @@ import type {
   AdministrationRoleResponse,
   AdministrationPermissionsResponse,
   GetAdministrationRolesParams,
+  AdministrationRoleCreateInput,
+  AdministrationRoleUpdateInput,
+  AdministrationRoleStatusInput,
+  AdministrationRolePermissionsInput,
 } from "../types/administration";
 
 // =====================================================
-// LISTADO DE ROLES
+// LISTAR ROLES
 // =====================================================
 
 export function getAdministrationRoles(
@@ -44,7 +48,7 @@ export function getAdministrationRoles(
 }
 
 // =====================================================
-// DETALLE DE ROL
+// CONSULTAR ROL
 // =====================================================
 
 export function getAdministrationRole(
@@ -61,7 +65,7 @@ export function getAdministrationRole(
 }
 
 // =====================================================
-// CATÁLOGO DE PERMISOS
+// CONSULTAR CATÁLOGO DE PERMISOS
 // =====================================================
 
 export function getAdministrationPermissions(
@@ -72,6 +76,73 @@ export function getAdministrationPermissions(
     {
       method: "GET",
       signal,
+    }
+  );
+}
+
+// =====================================================
+// CREAR ROL
+// =====================================================
+
+export function createAdministrationRole(
+  data: AdministrationRoleCreateInput
+): Promise<AdministrationRoleResponse> {
+  return apiRequest<AdministrationRoleResponse>(
+    "/roles",
+    {
+      method: "POST",
+      body: data,
+    }
+  );
+}
+
+// =====================================================
+// ACTUALIZAR ROL
+// =====================================================
+
+export function updateAdministrationRole(
+  roleId: string,
+  data: AdministrationRoleUpdateInput
+): Promise<AdministrationRoleResponse> {
+  return apiRequest<AdministrationRoleResponse>(
+    `/roles/${encodeURIComponent(roleId)}`,
+    {
+      method: "PATCH",
+      body: data,
+    }
+  );
+}
+
+// =====================================================
+// CAMBIAR ESTADO DEL ROL
+// =====================================================
+
+export function updateAdministrationRoleStatus(
+  roleId: string,
+  data: AdministrationRoleStatusInput
+): Promise<AdministrationRoleResponse> {
+  return apiRequest<AdministrationRoleResponse>(
+    `/roles/${encodeURIComponent(roleId)}/status`,
+    {
+      method: "PATCH",
+      body: data,
+    }
+  );
+}
+
+// =====================================================
+// SUSTITUIR PERMISOS DEL ROL
+// =====================================================
+
+export function updateAdministrationRolePermissions(
+  roleId: string,
+  data: AdministrationRolePermissionsInput
+): Promise<AdministrationRoleResponse> {
+  return apiRequest<AdministrationRoleResponse>(
+    `/roles/${encodeURIComponent(roleId)}/permissions`,
+    {
+      method: "PUT",
+      body: data,
     }
   );
 }

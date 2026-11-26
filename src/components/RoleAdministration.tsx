@@ -1,8 +1,10 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
     Alert,
+    Checkbox,
+    FormControlLabel,
     Box,
     Button,
     Card,
@@ -27,6 +29,8 @@ import {
 
 import {
     Security,
+    Add,
+    Edit,
     Search,
     Refresh,
     Visibility,
@@ -40,6 +44,8 @@ import {
     getAdministrationRoles,
     getAdministrationRole,
     getAdministrationPermissions,
+    updateAdministrationRolePermissions,
+    updateAdministrationRoleStatus,
 } from "../services/roles.service";
 
 import type {
@@ -47,6 +53,8 @@ import type {
     AdministrationPermission,
     AdministrationPermissionKey,
 } from "../types/administration";
+
+import RoleFormDialog from "./RoleFormDialog";
 
 const PER_PAGE = 15;
 
@@ -167,11 +175,15 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
 interface RoleCardProps {
     role: AdministrationRole;
     onView: (roleId: string) => void;
+    onEdit: (role: AdministrationRole) => void;
+    canManage: boolean;
 }
 
 function RoleCard({
     role,
     onView,
+    onEdit,
+    canManage,
 }: RoleCardProps) {
     return (
         <Card
@@ -299,6 +311,11 @@ function RoleCard({
                 >
                     Ver permisos
                 </Button>
+                {canManage && !role.system_key && (
+                    <Button size="small" startIcon={<Edit />} onClick={() => onEdit(role)} sx={{ alignSelf: "flex-start" }}>
+                        Editar rol
+                    </Button>
+                )}
             </CardContent>
         </Card>
     );
@@ -311,11 +328,15 @@ function RoleCard({
 interface RoleDetailsDialogProps {
     roleId: string | null;
     onClose: () => void;
+    catalog: AdministrationPermission[] | null;
+    onSaved: () => void;
 }
 
 function RoleDetailsDialog({
     roleId,
     onClose,
+    catalog,
+    onSaved,
 }: RoleDetailsDialogProps) {
     const [role, setRole] =
         useState<AdministrationRole | null>(null);
@@ -374,14 +395,69 @@ function RoleDetailsDialog({
         return () => controller.abort();
     }, [roleId, refreshVersion]);
 
-    if (!roleId) {
-        return null;
+    const [selected, setSelected] = useState<AdministrationPermissionKey[]>([]);
+    const [saving, setSaving] = useState(false);
+    const savingRef = useRef(false);
+    const [confirmStatus, setConfirmStatus] = useState(false);
+    const [permissionFeedback, setPermissionFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
+    const [statusFeedback, setStatusFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
+
+    useEffect(() => {
+        setSelected(role?.permissions ?? []);
+    }, [role]);
+
+    const assignable = new Set(catalog?.filter(p => p.assignable).map(p => p.key) ?? []);
+    const canManage = Boolean(role && !role.system_key && catalog && role.permissions.every(p => assignable.has(p)));
+    const changed = Boolean(role && (selected.length !== role.permissions.length || selected.some(p => !role.permissions.includes(p))));
+
+    async function savePermissions() {
+        if (!role || !canManage || !changed || savingRef.current || selected.some(p => !assignable.has(p))) return;
+        savingRef.current = true;
+        setSaving(true);
+        setPermissionFeedback(null);
+        try {
+            const response = await updateAdministrationRolePermissions(role.id, { permissions: selected });
+            setRole(response.data);
+            setSelected(response.data.permissions);
+            setPermissionFeedback({ severity: "success", message: "Permisos actualizados correctamente." });
+            onSaved();
+        } catch (err) {
+            setPermissionFeedback({ severity: "error", message: err instanceof Error ? err.message : "No fue posible guardar los permisos." });
+        } finally {
+            savingRef.current = false;
+            setSaving(false);
+        }
     }
+
+    async function saveStatus() {
+        if (!role || !canManage || changed || savingRef.current || !confirmStatus) return;
+        savingRef.current = true;
+        setSaving(true);
+        setStatusFeedback(null);
+        try {
+            const response = await updateAdministrationRoleStatus(role.id, { status: !role.status });
+            setRole(response.data);
+            setStatusFeedback({ severity: "success", message: response.data.status ? "Rol activado correctamente." : "Rol desactivado correctamente." });
+            onSaved();
+        } catch (err) {
+            setStatusFeedback({ severity: "error", message: err instanceof Error ? err.message : "No fue posible cambiar el estado." });
+        } finally {
+            setConfirmStatus(false);
+            savingRef.current = false;
+            setSaving(false);
+        }
+    }
+
+    function handleClose() {
+        if (!savingRef.current && (!changed || !canManage)) onClose();
+    }
+
+    if (!roleId) return null;
 
     return (
         <Dialog
             open
-            onClose={onClose}
+            onClose={handleClose}
             fullWidth
             maxWidth="md"
         >
@@ -586,17 +662,59 @@ function RoleDetailsDialog({
                             </Grid>
                         )}
 
-                        <Alert severity="info">
-                            Los permisos se muestran únicamente
-                            para consulta. La modificación de roles
-                            y permisos se incorporará posteriormente.
-                        </Alert>
+                        {role.system_key ? (
+                            <Alert severity="info">Los roles del sistema están protegidos.</Alert>
+                        ) : !canManage ? (
+                            <Alert severity="info">No puedes modificar este rol con tus permisos actuales.</Alert>
+                        ) : (
+                            <>
+                                <Divider />
+                                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Configurar permisos</Typography>
+                                {PERMISSION_GROUPS.map(group => (
+                                    <Box key={group.title}>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{group.title}</Typography>
+                                        <Stack>
+                                            {catalog?.filter(p => group.permissions.includes(p.key)).map(p => (
+                                                <FormControlLabel key={p.key} control={<Checkbox checked={selected.includes(p.key)} disabled={saving || confirmStatus || !p.assignable} onChange={() => {
+                                                    setPermissionFeedback(null);
+                                                    setSelected(current => current.includes(p.key) ? current.filter(key => key !== p.key) : [...current, p.key]);
+                                                }} />} label={`${PERMISSION_LABELS[p.key] ?? p.key}${p.assignable ? "" : " (No asignable)"}`} />
+                                            ))}
+                                        </Stack>
+                                    </Box>
+                                ))}
+                                {catalog?.filter(p => !PERMISSION_GROUPS.some(g => g.permissions.includes(p.key))).map(p => (
+                                    <FormControlLabel key={p.key} control={<Checkbox checked={selected.includes(p.key)} disabled={saving || confirmStatus || !p.assignable} onChange={() => {
+                                        setPermissionFeedback(null);
+                                        setSelected(current => current.includes(p.key) ? current.filter(key => key !== p.key) : [...current, p.key]);
+                                    }} />} label={p.key} />
+                                ))}
+                                {permissionFeedback && <Alert severity={permissionFeedback.severity} onClose={() => setPermissionFeedback(null)}>{permissionFeedback.message}</Alert>}
+                                <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
+                                    <Button disabled={!changed || saving} onClick={() => { setSelected(role.permissions); setPermissionFeedback(null); }}>Descartar cambios</Button>
+                                    <Button variant="contained" disabled={!changed || saving || confirmStatus} onClick={() => void savePermissions()}>Guardar permisos</Button>
+                                </Stack>
+                                <Divider />
+                                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Estado del rol</Typography>
+                                <Alert severity="info">Desactivar un rol conserva sus asignaciones. El backend valida las restricciones de acceso.</Alert>
+                                {statusFeedback && <Alert severity={statusFeedback.severity} onClose={() => setStatusFeedback(null)}>{statusFeedback.message}</Alert>}
+                                {confirmStatus ? (
+                                    <Stack spacing={2}>
+                                        <Alert severity="warning">¿Confirmas que deseas {role.status ? "desactivar" : "activar"} este rol?</Alert>
+                                        <Stack direction="row" spacing={2}>
+                                            <Button disabled={saving} onClick={() => setConfirmStatus(false)}>Cancelar</Button>
+                                            <Button variant="contained" color={role.status ? "error" : "success"} disabled={saving || changed} onClick={() => void saveStatus()}>{saving ? "Procesando..." : "Confirmar"}</Button>
+                                        </Stack>
+                                    </Stack>
+                                ) : <Box><Button variant="outlined" color={role.status ? "error" : "success"} disabled={saving || changed} onClick={() => { setStatusFeedback(null); setConfirmStatus(true); }}>{role.status ? "Desactivar rol" : "Activar rol"}</Button></Box>}
+                            </>
+                        )}
                     </Stack>
                 ) : null}
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose}>
+                <Button onClick={handleClose} disabled={saving || (changed && canManage)}>
                     Cerrar
                 </Button>
             </DialogActions>
@@ -896,8 +1014,20 @@ export default function RoleAdministration() {
     const [selectedRoleId, setSelectedRoleId] =
         useState<string | null>(null);
 
-    const [catalogOpen, setCatalogOpen] =
-        useState(false);
+    const [catalogOpen, setCatalogOpen] = useState(false);
+    const [catalog, setCatalog] = useState<AdministrationPermission[] | null>(null);
+    const [form, setForm] = useState<{ role?: AdministrationRole } | null>(null);
+    const [feedback, setFeedback] = useState<string | null>(null);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        getAdministrationPermissions(controller.signal).then(response => {
+            if (!controller.signal.aborted) setCatalog(response.data);
+        }).catch(() => {
+            if (!controller.signal.aborted) setCatalog(null);
+        });
+        return () => controller.abort();
+    }, [refreshVersion]);
 
     // ===================================================
     // BÚSQUEDA
@@ -1041,6 +1171,8 @@ export default function RoleAdministration() {
                     </Typography>
                 </Box>
 
+                <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                {catalog !== null && <Button variant="contained" startIcon={<Add />} onClick={() => setForm({})}>Nuevo rol</Button>}
                 <Button
                     variant="outlined"
                     startIcon={<Security />}
@@ -1048,6 +1180,7 @@ export default function RoleAdministration() {
                 >
                     Catálogo de permisos
                 </Button>
+                </Stack>
             </Stack>
 
             {/* FILTROS */}
@@ -1152,6 +1285,8 @@ export default function RoleAdministration() {
                 </Alert>
             )}
 
+            {feedback && <Alert severity="success" onClose={() => setFeedback(null)}>{feedback}</Alert>}
+
             {/* LISTADO */}
 
             {loading ? (
@@ -1195,6 +1330,8 @@ export default function RoleAdministration() {
                                     <RoleCard
                                         role={role}
                                         onView={setSelectedRoleId}
+                                        canManage={catalog !== null && role.permissions.every(p => catalog.some(item => item.key === p && item.assignable))}
+                                        onEdit={(item) => setForm({ role: item })}
                                     />
                                 </Grid>
                             ))}
@@ -1227,10 +1364,14 @@ export default function RoleAdministration() {
             <RoleDetailsDialog
                 key={`role-details-${selectedRoleId ?? "closed"}`}
                 roleId={selectedRoleId}
+                catalog={catalog}
+                onSaved={refresh}
                 onClose={() =>
                     setSelectedRoleId(null)
                 }
             />
+
+            {form && <RoleFormDialog role={form.role} onClose={() => setForm(null)} onSaved={(_, message) => { setForm(null); setFeedback(message); refresh(); }} />}
 
             {/* CATÁLOGO DE PERMISOS */}
 
